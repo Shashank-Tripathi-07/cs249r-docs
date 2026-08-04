@@ -1,0 +1,192 @@
+# TinyTorch: Design
+
+*This is the contributor-facing design document for TinyTorch, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `tinytorch/` in that repo. It explains what TinyTorch is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](tinytorch-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-04). "Project history" at the end covers real bugs and design decisions that shaped the current architecture, and "Known issues" lists documented gaps and things still in progress, both good places to look for a first contribution.*
+
+## Problem
+
+Most machine learning courses and tutorials teach students to *use* a framework: import PyTorch, call `.backward()`, train a model. Very few teach students to *build* one. That leaves a gap: engineers who can call `nn.Linear` fluently but have never implemented backpropagation by hand, never had to reason about why a matmul is memory-bound, and have no intuition for what a framework is actually doing underneath the API.
+
+TinyTorch is a hands-on systems course structured as 20 progressive modules in which students build their own ML framework, using only NumPy, from a tensor class through a working transformer with attention, autograd, training loops, quantization, and performance optimization. The explicit goal is "AI bricks": the stable engineering foundations that transfer to any real framework, learned by building rather than importing.
+
+## Goals
+
+- 20 progressive modules, each with a clear prerequisite chain, taking a student from a bare `Tensor` class (Module 01) to a working, trainable CNN and GPT-style transformer (by Module 13), then into systems-level optimization: profiling, quantization, compression, acceleration, memoization, and benchmarking (Modules 14 through 19), ending in a capstone competition (Module 20).
+- A framework built entirely from scratch on top of NumPy, with no dependency on PyTorch or TensorFlow, so every operation a student uses was implemented by that same student.
+- Historical-ML "milestones": six standalone exercises (from the 1958 Perceptron through 2018 MLPerf-style benchmarking) that recreate pivotal moments in ML history using the student's own module implementations, gated on having completed the modules each milestone depends on.
+- A grading and release pipeline (built on nbgrader) that lets instructors maintain one instructor-facing source of truth and automatically strip it down to a student-facing assignment, without hand-maintaining two parallel codebases.
+- A single CLI, `tito`, that is the primary interface for the whole course: starting and testing modules, running milestones, benchmarking a finished framework, and (optionally) syncing progress to a community dashboard.
+- Multiple ways to run the course with no local setup required: mybinder.org, Google Colab, and an institutional JupyterHub, in addition to a local `pip install`-based workflow.
+- Free and open source (MIT license for the `tinytorch`/`tito` packages), deployable and forkable by anyone.
+
+## Non-goals
+
+- Not a production or performance-competitive ML framework. It is deliberately small enough to read end to end and run on modest hardware (the project's own framing: "small enough to learn from, big enough to matter").
+- No GPU acceleration. Everything runs on NumPy on the CPU; that's a deliberate simplicity choice, not a missing feature.
+- The "Olympics" competitive leaderboard (`tito olympics`) is not a working feature yet. As of this document it is a "coming soon" placeholder that prints planned tracks (speed, compression, accuracy, and similar) and does nothing else. Don't confuse it with `tinytorch.olympics`, the actual Python module students build in the Module 20 capstone; that part is real and functional.
+- The three-tier release model (instructor, student, challenge) described in `NBGRADER_RELEASE_TIERS.md` is a design proposal, not the shipped behavior. What's actually implemented today is a simpler two-artifact model: instructor source with `### BEGIN SOLUTION` / `### END SOLUTION` markers, stripped down to one student release via nbgrader.
+- Server-side benchmark submission is not fully wired up. `tito benchmark` computes real local scores and can offer to submit them, but the actual submission call is a stub; results are only ever saved locally as of this document.
+
+## Technology stack
+
+Everything TinyTorch uses, what it is, and why it's the right tool for this project.
+
+### Core framework and language
+
+| Technology | What it is | How TinyTorch uses it |
+|---|---|---|
+| Python | A general-purpose programming language. | The language the entire framework, CLI, and test suite are written in. Supports Python 3.10 through 3.13. |
+| NumPy | A numerical computing library for array operations. | The *only* numerical dependency of the framework itself. Every operation students implement (tensors, layers, autograd, convolutions, attention) is built directly on NumPy arrays, with no other ML library involved. |
+| Rich | A Python library for formatted terminal output. | Powers essentially all of `tito`'s console output: banners, progress panels, colored status messages, and the educational WHAT/WHY test-output mode. |
+| PyYAML | A YAML parsing library. | Reads each module's `module.yaml` metadata file (title, subtitle, description) and other YAML-based configuration. |
+
+### The module authoring and release pipeline
+
+| Technology | What it is | How TinyTorch uses it |
+|---|---|---|
+| Jupytext | A tool that keeps Jupyter notebooks and plain-text scripts in sync. | Each module's source of truth is a plain `.py` file in "percent format" (`src/<NN_name>/<NN_name>.py`). Jupytext converts that file into the `.ipynb` notebook that students actually open and edit in `modules/<NN_name>/`. |
+| nbdev | A literate-programming toolkit (originally from fastai) that compiles annotated notebook cells into an installable Python package. | Reads `#| export`-tagged cells out of the module notebooks and compiles them into the real, importable `tinytorch/` package (for example, `tinytorch.core.tensor`). Configured via `settings.ini` at the `tinytorch/` root. |
+| nbgrader | A Jupyter-based assignment and grading tool. | Provides the actual solution-stripping and grading engine. `tito nbgrader` is a thin, TinyTorch-specific convenience layer around nbgrader's own workflow (generate, release, collect, autograde, feedback). |
+| YAML-based `module.yaml` | A small per-module metadata file. | Supplies the title, subtitle, and description shown for each module in the CLI and docs. |
+
+### The `tito` CLI
+
+| Technology | What it is | How TinyTorch uses it |
+|---|---|---|
+| `argparse` (Python standard library) | Python's built-in command-line argument parser. | `tito` is built entirely on `argparse`, with two levels of subcommands (for example `tito module test`), rather than a third-party CLI framework like Click or Typer. |
+| pytest | Python's standard test framework. | Runs every category of test in the project: per-module unit tests, integration tests, CLI tests, end-to-end tests, environment checks, and regression tests. `tito module test` and `tito dev test` are wrappers around pytest invocations. |
+
+### Docs, PDFs, and the website
+
+| Technology | What it is | How TinyTorch uses it |
+|---|---|---|
+| Quarto | A publishing system for technical documents, built on Pandoc. | Builds the public docs site at `mlsysbook.ai/tinytorch/` from hand-authored `.qmd` pages under `tinytorch/quarto/`, and separately builds a PDF course guide via a second Quarto book project. |
+| TinyTeX and Mermaid CLI | A minimal LaTeX distribution, and a diagram-rendering CLI. | Used in CI to render the Quarto-based PDF guide, including any Mermaid diagrams it contains. |
+| LaTeX (via `xu-cheng/latex-action`) | A typesetting system. | Compiles the separate TinyTorch research paper (`tinytorch/paper/paper.tex`) to PDF in CI, independent of the Quarto-based guide. |
+| GitHub Pages (`gh-pages` branch) | Static site hosting built into GitHub. | Hosts the production docs site, published to the `tinytorch/` subdirectory of the shared `gh-pages` branch. |
+
+### Community and progress tracking (optional layer)
+
+| Technology | What it is | How TinyTorch uses it |
+|---|---|---|
+| Supabase Edge Functions | Serverless functions backing a Supabase (Postgres-based) backend. | Receives progress and milestone data uploaded by `tito community sync` and the auto-sync flow after module completion. |
+| A Netlify-hosted web backend | The TinyTorch website's own API, at `tinytorch.netlify.app`. | Handles the browser-based login flow (`tito login` / `tito community login`) that authenticates a student before syncing progress or appearing on the community dashboard. |
+| Vanilla HTML, CSS, and JavaScript | Plain web technologies, no framework. | The "TinyTorch Community" dashboard (`quarto/community/`), including an interactive 3D "globe" progress visualization, is hand-built HTML/JS served alongside the Quarto site rather than generated by it. |
+| Playwright | A browser-automation framework for real, headless browsers. | Runs the community dashboard's own end-to-end tests (`quarto/community/community/tests/`). |
+
+### Editor tooling and cloud environments
+
+| Technology | What it is | How TinyTorch uses it |
+|---|---|---|
+| VS Code Extension API (TypeScript) | The API used to build Visual Studio Code extensions. | Powers "TinyTorch Workbench" (`vscode-ext/`), a sidebar extension that wraps the `tito` module, test, and build workflow in a graphical tree view, for students and contributors who prefer working inside VS Code. |
+| mybinder.org and Google Colab | Free, browser-based hosted Jupyter environments. | Let students run TinyTorch with no local installation at all. A `binder/postBuild` script installs the package and regenerates every module notebook from source at environment build time. |
+| Docker | A containerization tool. | Used in CI (`tinytorch-validate-dev.yml`'s fresh-install stage) to simulate a brand-new student machine installing the package from scratch. |
+
+## Architecture
+
+### The three-tree module system
+
+Every module lives in three parallel locations, all keyed by the same `NN_name` directory name (for example `01_tensor`):
+
+- **`src/<NN_name>/`**: the source of truth, written and maintained by instructors and contributors. Contains `<NN_name>.py`, a Jupytext "percent format" Python file mixing `# %% [markdown]` prose cells (learning objectives, prerequisites, dependency diagrams) with `# %%` code cells, plus `module.yaml` (title, subtitle, description).
+- **`modules/<NN_name>/`**: the generated notebook a student actually opens in Jupyter. It's produced from `src/` by Jupytext and is not meant to be hand-edited directly; running `tito dev export` regenerates it.
+- **`tests/<NN_name>/`**: the pytest suite for that module.
+- **`tinytorch/`**: the final, installable package. nbdev reads `#| export`-tagged cells out of the module notebook and compiles them into real Python modules (for example, `#| default_exp core.tensor` plus `#| export` in `src/01_tensor/01_tensor.py` produces `tinytorch/core/tensor.py`). Every generated file carries an auto-inserted "AUTOGENERATED! DO NOT EDIT!" banner and nbdev provenance comments pointing back at the source notebook.
+
+Within a module's source file, implementation gaps that students fill in are marked with `TODO:` comments and delimited by `### BEGIN SOLUTION` / `### END SOLUTION` blocks, alongside nbgrader cell metadata (`grade`, `grade_id`, `solution`). When an instructor runs the release pipeline, nbgrader's solution-clearing step strips everything between those markers for the student-facing artifact, leaving the surrounding scaffolding, hints, and tests intact. This is currently a two-artifact model (instructor source, student release). `NBGRADER_RELEASE_TIERS.md` proposes extending it to a three-tier model (instructor, student, and an additional "challenge" tier layered on a working baseline, using role-annotated markers like `### BEGIN SOLUTION role=core`), but that proposal is not yet implemented; the marker constants exist in code, but the tier-selection flow is not exposed as a supported command.
+
+### The `tito` CLI
+
+`tito` (entry point `tito.main:main`, declared in `pyproject.toml`) is a hand-built `argparse` application, not built on a third-party CLI framework. `TinyTorchCLI` (`tito/main.py`) keeps a single dictionary mapping top-level command names to command classes, and each top-level command is itself a command group that registers its own nested subcommands. Every command inherits from an abstract `BaseCommand` that provides consistent error handling and console access.
+
+Top-level command groups:
+
+| Command | What it's for |
+|---|---|
+| `tito setup` | First-time environment setup: creates a virtual environment, installs the fixed toolchain (NumPy, Jupyter, Jupytext, nbdev, Rich, PyYAML, psutil), registers a `tinytorch` Jupyter kernel, and prompts to create a local profile and (optionally) join the community. |
+| `tito system` | Environment tools: `info`, `health`, `jupyter` (launch a notebook/lab server), `update`, `logo`, `reset`. |
+| `tito module` | The core student workflow: `start`, `view`, `resume`, `test`, `complete`, `reset`, `status`, `list`, `path`. This is what a student runs on nearly every module. |
+| `tito dev` | Developer and CI tooling, gated behind the `dev` group: `test` (the unified pytest runner used by CI), `preflight` (pre-release verification), `export` (rebuild the whole curriculum from `src/`), `build` (build the site, PDF guide, or paper via `make`), `clean`. |
+| `tito package` | nbdev/package management: `reset` (clear exported package files or all user progress), `nbdev` (a thin wrapper around the underlying nbdev CLI). |
+| `tito nbgrader` | The instructor grading workflow: `init`, `generate`, `release`, `collect`, `autograde`, `feedback`, `status`, `analytics`, `report`. A convenience layer that shells out to the real `nbgrader` CLI for most of the heavy lifting. |
+| `tito milestone` | Historical-ML milestone exercises: `list`, `run`, `info`, `status`, `timeline`, `test`, `demo`. |
+| `tito community` | Account and social features: `login`/`logout`, `profile`, `status`, `map`, `sync`. |
+| `tito benchmark` | Performance scoring: `baseline` (quick NumPy micro-benchmarks) and `capstone` (scores a student's finished Module 20 framework, or falls back to a placeholder if it isn't built yet). |
+| `tito olympics` | The not-yet-implemented competitive leaderboard placeholder described in "Non-goals" above. |
+
+A module's `test` and `complete` commands are not the same operation. `tito module test NN` runs a three-phase check (inline sanity assertions, the module's own pytest suite, and relevant integration tests) without touching the installed package. `tito module complete NN` runs that same testing, then additionally exports the module's code into the real `tinytorch/` package via nbdev and records progress; only `complete` actually updates what a student can `import`.
+
+### Milestones
+
+Milestones are historical-ML reproductions, separate from the 20 numbered modules, living in their own `milestones/<NN_year_name>/` directories at the project root. Each one recreates a specific pivotal moment in ML history using the student's own module implementations, and is gated on having completed a specific set of prerequisite modules:
+
+| Milestone | Year | Requires modules | Task |
+|---|---|---|---|
+| Perceptron | 1958 | 01 to 03 | Rosenblatt's perceptron forward pass |
+| XOR Crisis | 1969 | 01 to 03 | Demonstrate that a single layer can't solve XOR |
+| MLP Revival | 1986 | 01 to 08 | Train a multi-layer perceptron on XOR and digit recognition |
+| CNN Revolution | 1998 | 01 to 09 | Build a LeNet-style convolutional network |
+| Transformer Era | 2017 | 01 to 08, 11 to 13 | Attention on reversal, copy, and mixed-sequence tasks |
+| MLPerf Benchmarks | 2018 | 01 to 08, 14 to 19 | Optimize and benchmark a trained model |
+
+Run via `tito milestone run <NN>`, `tito milestone list`, and `tito milestone info <NN>`. Each milestone's own scripts import the student's real Tensor, Layers, and other module classes directly, so a milestone only works once the student's own implementations are correct; it functions as an integration test for the whole course arc up to that point, and in practice has caught real API-drift bugs between milestone scripts and module implementations (see "Project history").
+
+### Benchmark and Olympics
+
+`tito benchmark` is the functional performance-scoring feature. `baseline` runs small, fast NumPy micro-benchmarks and normalizes the result against a hardcoded reference system into a 0 to 100 score. `capstone` scores whatever the student built in the Module 20 capstone (`tinytorch.olympics`), or falls back to a simplified placeholder score if that module hasn't been completed yet. Both save their results as local JSON under `.tito/benchmarks/`; both can prompt to submit results to the website, but that submission call is currently a stub, so results only ever persist locally as of this document.
+
+`tito olympics` is a different, separate command: a "coming soon" placeholder that prints an ASCII banner and a description of planned competitive tracks (speed, compression, accuracy, and similar). It is not connected to any real leaderboard yet.
+
+### Community dashboard and progress sync
+
+Students can optionally create an account and opt into a social layer: `tito community login` opens a browser-based login flow against the TinyTorch website's backend, which redirects back to a short-lived local HTTP server with an access token. Once logged in, completing a module or milestone can automatically upload progress (via a Supabase Edge Function) to power a personal profile and an interactive "TinyTorch Globe" dashboard, hand-built as static HTML and JavaScript under `quarto/community/` and served alongside the Quarto docs site rather than generated by it. This entire layer is opt-in; nothing about completing modules or milestones requires an account, and progress always exists locally first (`.tito/progress.json`, `.tito/milestones.json`) regardless of whether it's ever synced.
+
+### Documentation site and PDFs
+
+The public docs site (`mlsysbook.ai/tinytorch/`) is a Quarto project rooted at `tinytorch/quarto/`. Each module has a corresponding hand-authored `.qmd` page under `quarto/modules/` (for example `01_tensor.qmd`), but this is not generated from the module notebook. It's independent prose that links out to the actual notebook (a Binder launch URL) and the actual source file (a GitHub link), so the three representations of a module (source, notebook, docs page) are maintained separately and can drift out of sync with each other.
+
+A separate Quarto book project under `quarto/pdf/` reuses those same `.qmd` chapter files to render a downloadable PDF course guide via LaTeX. The TinyTorch research paper is a fully independent LaTeX document (`paper/paper.tex`), compiled separately and not derived from the Quarto content at all.
+
+### Deployment environments
+
+TinyTorch is designed to run in four different ways with no code changes: a local `pip install` (the default contributor workflow), mybinder.org (a `binder/postBuild` script installs the package and regenerates every module notebook from source at environment build time, since generated notebooks aren't committed to git), Google Colab, and an institutional JupyterHub for classroom deployment.
+
+### CI/CD
+
+Five GitHub Actions workflows cover validation, previews, production publishing, and PDF builds:
+
+- **`tinytorch-validate-dev.yml`**: the required gate. Runs on every push to `dev` and every pull request, matrixed across Ubuntu and Windows. An 8-stage pipeline: configure, build the package from `src/`, unit tests, integration tests, CLI tests, end-to-end tests, a Docker-based fresh-install simulation (student experience from a clean machine), and a non-blocking link check over the docs site.
+- **`tinytorch-preview-dev.yml`**: triggered automatically after validation passes on `dev`. Builds the docs site and PDFs, runs a visual smoke test, and deploys to a separate dev-preview GitHub Pages site.
+- **`tinytorch-publish-live.yml`**: manual only, requires typing `PUBLISH` to confirm. Re-validates everything, bumps the version across `pyproject.toml`, `settings.ini`, `quarto/install.sh`, and the README badge, merges `dev` into `main`, builds the site and PDFs, deploys to `mlsysbook.ai/tinytorch/` via the `gh-pages` branch, and creates a `tinytorch-vX.Y.Z` git tag and draft GitHub Release.
+- **`tinytorch-build-pdfs.yml`**: a reusable workflow that builds the PDF guide and the research paper as artifacts, called by both the preview and publish workflows.
+- **`tinytorch-update-pdfs.yml`**: manual only, for updating just the published PDF downloads without a full site rebuild or version bump.
+
+### Testing
+
+Tests live under `tests/`, split by purpose: one directory per module (`tests/01_tensor` through `tests/20_capstone`) for unit tests, plus `tests/cli` (black-box tests of the `tito` command itself), `tests/e2e` (full simulated student journeys, run as `tito` subprocesses, tagged by speed from a roughly 30-second quick check up to a 7 to 8 minute full journey), `tests/environment` (validates the local dev environment itself: Python version, active virtualenv, core imports), `tests/integration` (cross-module tests: tensor plus autograd plus layers, a full training pipeline, CNNs, and similar), `tests/milestones` (smoke tests that every milestone script still imports and runs against the current module APIs), and `tests/regression` (pinned tests documenting specific historical autograd and shape bugs, so they can't silently return).
+
+A root `conftest.py` runs a pre-flight check before any test executes: it verifies the `tinytorch` package was actually exported and importable, and fails fast with an instruction to run `tito dev export --all` if not, rather than letting every downstream test fail with a confusing import error.
+
+## Known issues
+
+These are good starting points if you're looking for a first contribution.
+
+- **`CONTRIBUTING.md`'s documented release process doesn't match the actual publish workflow.** It states the release process "deploys to tinytorch.org" and "publishes to PyPI." Neither is true as of this document: `tinytorch-publish-live.yml` deploys to `mlsysbook.ai/tinytorch/` via the `gh-pages` branch, and contains no PyPI publish step anywhere (grepped for `pypi`/`twine`, no matches). Distribution is currently via git tags and GitHub Releases, not PyPI, unlike the sibling `mlsysim` package, which does have its own `mlsysim-pypi-publish.yml`.
+- **The three-tier release model in `NBGRADER_RELEASE_TIERS.md` is an unimplemented proposal.** The document itself says so explicitly ("an internal proposal... a design document, not a public user guide"), but a reader skimming only the per-module classification tables could easily mistake it for current behavior. The shipped system is the simpler two-artifact (instructor, student) model.
+- **`tito olympics` is a placeholder with no real functionality**, as described above, distinct from the working `tinytorch.olympics` capstone module.
+- **`tito benchmark`'s server submission is a stub.** Both `baseline` and `capstone` compute and save real local scores, but the "submit to the community" call does not actually reach a server as of this document.
+- **`settings.ini` and `pyproject.toml` specify different (looser versus pinned) dependency version ranges** for the same nbdev-managed project, a known source of potential drift between the two config files that both describe the same package.
+- **`tests/integration/test_module_integration.py` is dead code**, explicitly marked `pytest.mark.skip` with a comment that it targets stale package paths; current integration coverage lives in the more focused test files alongside it.
+- **`tinytorch/scripts/build-docs.sh` is a stale script** referencing a defunct Jupyter Book documentation pipeline that predates the current Quarto site. It is not invoked by any current CI workflow.
+- **The three representations of a module (`src/`, the generated notebook in `modules/`, and the docs page in `quarto/modules/`) are maintained independently, not generated from one another.** A docs page can go stale relative to the actual module source without any build failure to catch it.
+
+## Project history
+
+- **`tito/core/runtime.py` documents a real, fixed bug about conflating "running in CI" with "running non-interactively."** The module's own comments describe a past incident where treating those two conditions as the same thing broke automatic progress-sync behavior specifically on Windows Git Bash; the file now keeps `is_ci()` and `is_interactive()` as two explicitly separate checks.
+- **A cluster of autograd and shape bugs are preserved as permanent regression tests** in `tests/regression/`, discovered while building the transformer milestone: using `np.dot` instead of `np.matmul` silently produced wrong results for batched 3D tensors, `transpose()` was dropping `requires_grad` and breaking gradient flow, and several backward passes (`SubBackward`, `DivBackward`, and gradient paths through Softmax, Dropout, Embedding, Attention, and LayerNorm) were missing or incorrect. Each has a dedicated, permanently pinned test so the specific bug can't silently return.
+- **The milestone smoke tests exist because milestone scripts and module APIs have drifted apart before.** `tests/milestones/test_milestones_smoke.py` cites a real example, a `pool_size` versus `kernel_size` naming mismatch, tracked as GitHub issue #1278, where a milestone script broke because the module API it depended on had changed underneath it without the milestone being updated to match.
+- **The dashboard on the TinyTorch community site (`tinytorch/quarto/community/dashboard.html`) once had its "Acceleration" and "Memoization" module description and contributor fields swapped**, a straightforward data-entry bug in the hardcoded per-module dataset embedded in the page. Fixed by correcting the field assignment for the two entries (PR #1979, merged to `dev`).
+- **`CHANGELOG.md`'s 0.1.10 entry describes adding an `explicit_version` input to the publish workflow** specifically to support non-incremental version jumps, along with fixing version synchronization across `settings.ini`, `pyproject.toml`, `quarto/install.sh`, and the README version badge, which had previously been able to drift out of sync with each other across a release.
+
+## Contributing
+
+Once you understand the shape of the project from this document, the [implementation reference](tinytorch-implementation.md) is where you'll actually work: it has the full file map, real code from the module and CLI systems, local setup steps, and common contribution workflows. The "Known issues" list above is a reasonable place to find a first task, and the "Project history" section shows the kind of bug that tends to surface in this codebase (drift between the several parallel representations of the same module, and gradient or shape bugs that only show up once real training happens) so you know what to watch for when reviewing your own changes.
