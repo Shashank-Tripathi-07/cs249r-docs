@@ -1,6 +1,6 @@
 # MLPerf EDU: Implementation Reference
 
-> **Status: as-built, contributor-facing.** MLPerf EDU is a live, already-implemented benchmark specification, CLI, and evidence pipeline, with an honestly-tracked partial portfolio (see the design doc's "Known issues"). This document is your map for reading and modifying the real source: file paths and representative code pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](mlperf-edu-design.md) first for the "what and why"; this doc is the "where and how."
+> **Status: as-built, contributor-facing.** MLPerf EDU is a live, already-implemented benchmark specification, CLI, and evidence pipeline, with an honestly-tracked partial portfolio (see the design doc's "Known issues"). This document is your map for reading and modifying the real source: file paths and representative code pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how."
 
 ## Prerequisites
 

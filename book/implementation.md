@@ -1,6 +1,6 @@
 # Machine Learning Systems (The Book): Implementation Reference
 
-> **Status: as-built, contributor-facing.** The book is a live, already-published, two-volume textbook with an extensive custom tooling layer. This document is your map for reading and modifying the real source: file paths and real commands pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](book-design.md) first for the "what and why," especially its "Known issues" section on the Binder naming collision; this doc is the "where and how."
+> **Status: as-built, contributor-facing.** The book is a live, already-published, two-volume textbook with an extensive custom tooling layer. This document is your map for reading and modifying the real source: file paths and real commands pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design.md) first for the "what and why," especially its "Known issues" section on the Binder naming collision; this doc is the "where and how."
 
 ## Prerequisites
 

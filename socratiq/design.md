@@ -1,6 +1,6 @@
 # Socratiq: Design
 
-*This is the contributor-facing design document for Socratiq, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `socratiq/` in that repo. It explains what Socratiq is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](socratiq-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers real design decisions that shaped the current architecture, and "Known issues" lists documented gaps, including one important current-state fact worth reading before you assume the widget is live anywhere.*
+*This is the contributor-facing design document for Socratiq, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `socratiq/` in that repo. It explains what Socratiq is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers real design decisions that shaped the current architecture, and "Known issues" lists documented gaps, including one important current-state fact worth reading before you assume the widget is live anywhere.*
 
 ## Problem
 
@@ -98,4 +98,4 @@ These are good starting points if you're looking for a first contribution, and t
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](socratiq-implementation.md) is where you'll actually work: it has the file map, real code from the chat and quiz subsystems, the build and publish pipeline, local setup steps, and common contribution workflows. The "Known issues" list above is a reasonable place to find a first task, especially since re-enabling the embed script tag (once whatever "quiz regeneration" blocker is resolved) would be a small, high-impact change.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the file map, real code from the chat and quiz subsystems, the build and publish pipeline, local setup steps, and common contribution workflows. The "Known issues" list above is a reasonable place to find a first task, especially since re-enabling the embed script tag (once whatever "quiz regeneration" blocker is resolved) would be a small, high-impact change.

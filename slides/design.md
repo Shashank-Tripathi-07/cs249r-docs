@@ -1,6 +1,6 @@
 # Lecture Slides: Design
 
-*This is the contributor-facing design document for the Lecture Slides sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `slides/` in that repo. It explains what the slides project is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](slides-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers a real build-tooling decision that shaped the current setup, and "Known issues" lists documented gaps.*
+*This is the contributor-facing design document for the Lecture Slides sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `slides/` in that repo. It explains what the slides project is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers a real build-tooling decision that shaped the current setup, and "Known issues" lists documented gaps.*
 
 ## Problem
 
@@ -85,4 +85,4 @@ These are good starting points if you're looking for a first contribution.
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](slides-implementation.md) is where you'll actually work: it has the file map, the real `Makefile` targets, the theme and macro system, the PPTX export pipeline, and common contribution workflows for adding or editing a deck. The "Known issues" list above is a reasonable place to find a first task.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the file map, the real `Makefile` targets, the theme and macro system, the PPTX export pipeline, and common contribution workflows for adding or editing a deck. The "Known issues" list above is a reasonable place to find a first task.

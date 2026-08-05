@@ -1,6 +1,6 @@
 # ML Systems Design Grammar: Design
 
-*This is the contributor-facing design document for the ML Systems Design Grammar, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `design-grammar/` in that repo. It explains what the design grammar is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](design-grammar-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers real design decisions that shaped the current architecture, and "Known issues" lists documented gaps, both good places to look for a first contribution.*
+*This is the contributor-facing design document for the ML Systems Design Grammar, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `design-grammar/` in that repo. It explains what the design grammar is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers real design decisions that shaped the current architecture, and "Known issues" lists documented gaps, both good places to look for a first contribution.*
 
 ## Problem
 
@@ -99,4 +99,4 @@ These are good starting points if you're looking for a first contribution.
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](design-grammar-implementation.md) is where you'll actually work: it has the file map, real YAML entries, the validator's actual checks, and common contribution workflows for adding a new primitive, a new assembly, or a new rewrite rule. The "Known issues" list above is a reasonable place to find a first task, particularly wiring up a dedicated CI validation workflow, since that gap is concrete and self-contained.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the file map, real YAML entries, the validator's actual checks, and common contribution workflows for adding a new primitive, a new assembly, or a new rewrite rule. The "Known issues" list above is a reasonable place to find a first task, particularly wiring up a dedicated CI validation workflow, since that gap is concrete and self-contained.

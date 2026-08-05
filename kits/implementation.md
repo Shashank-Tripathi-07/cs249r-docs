@@ -1,6 +1,6 @@
 # Hardware Kits: Implementation Reference
 
-> **Status: as-built, contributor-facing.** Hardware Kits is a live, already-published Quarto site and PDF. This document is your map for reading and modifying the real source: file paths and real build commands pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](kits-design.md) first for the "what and why"; this doc is the "where and how."
+> **Status: as-built, contributor-facing.** Hardware Kits is a live, already-published Quarto site and PDF. This document is your map for reading and modifying the real source: file paths and real build commands pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how."
 
 ## Prerequisites
 

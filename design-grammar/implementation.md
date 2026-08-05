@@ -1,6 +1,6 @@
 # ML Systems Design Grammar: Implementation Reference
 
-> **Status: as-built, contributor-facing.** The Design Grammar is a live, already-implemented catalog and toolchain. This document is your map for reading and modifying the real source: file paths, line numbers, and representative data pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design-grammar-design.md) first for the "what and why"; this doc is the "where and how."
+> **Status: as-built, contributor-facing.** The Design Grammar is a live, already-implemented catalog and toolchain. This document is your map for reading and modifying the real source: file paths, line numbers, and representative data pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how."
 
 ## Prerequisites
 

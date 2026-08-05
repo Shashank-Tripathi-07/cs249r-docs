@@ -1,6 +1,6 @@
 # The Blueprint (Instructor Site): Design
 
-*This is the contributor-facing design document for "The Blueprint," the instructor site sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `instructors/` in that repo. It explains what the instructor site is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](instructors-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Known issues" at the end lists a documented content-drift gap worth knowing about.*
+*This is the contributor-facing design document for "The Blueprint," the instructor site sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `instructors/` in that repo. It explains what the instructor site is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Known issues" at the end lists a documented content-drift gap worth knowing about.*
 
 ## Problem
 
@@ -72,4 +72,4 @@ Despite being organized entirely around an instructor's needs, this is a fully p
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](instructors-implementation.md) is where you'll actually work: it has the file map, the real Quarto navigation configuration, the link-checking tooling, local setup steps, and common contribution workflows for adding or editing a page. The README drift noted above is a small, self-contained first task if you want one.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the file map, the real Quarto navigation configuration, the link-checking tooling, local setup steps, and common contribution workflows for adding or editing a page. The README drift noted above is a small, self-contained first task if you want one.

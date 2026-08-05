@@ -1,6 +1,6 @@
 # Landing and Community Site: Design
 
-*This is the contributor-facing design document for the landing and community site sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `site/` in that repo. It explains what this site is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](site-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers a real front-end redesign decision, and "Known issues" lists what's worth knowing before you touch this code.*
+*This is the contributor-facing design document for the landing and community site sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `site/` in that repo. It explains what this site is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05). "Project history" at the end covers a real front-end redesign decision, and "Known issues" lists what's worth knowing before you touch this code.*
 
 ## Problem
 
@@ -76,4 +76,4 @@ This project deliberately does not maintain its own navbar, footer, or base them
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](site-implementation.md) is where you'll actually work: it has the file map, the real newsletter CLI commands, the shared-configuration mechanism, local setup steps, and common contribution workflows for adding content, editing the landing page, or working on a mini-game. The "Known issues" list above is a reasonable place to find a first task, particularly checking whether the shared-asset sync script has a CI-enforced check mode.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the file map, the real newsletter CLI commands, the shared-configuration mechanism, local setup steps, and common contribution workflows for adding content, editing the landing page, or working on a mini-game. The "Known issues" list above is a reasonable place to find a first task, particularly checking whether the shared-asset sync script has a CI-enforced check mode.

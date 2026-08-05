@@ -1,6 +1,6 @@
 # StaffML: Design
 
-*This is the contributor-facing design document for StaffML, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository). It explains what StaffML is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](staffml-implementation.md) when you're ready to touch code. Both documents describe the app as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-04); the "Project history" section at the end covers the pivots and bugs that shaped the current design, and "Known issues" lists what still needs work, both good places to look for your first contribution.*
+*This is the contributor-facing design document for StaffML, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository). It explains what StaffML is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the app as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-04); the "Project history" section at the end covers the pivots and bugs that shaped the current design, and "Known issues" lists what still needs work, both good places to look for your first contribution.*
 
 ## Problem
 
@@ -247,4 +247,4 @@ These are good starting points if you're looking for a first contribution.
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](staffml-implementation.md) is where you'll actually work: it has the full file map, real code from every subsystem, local setup steps, and common contribution workflows. The "Known issues" list above is a reasonable place to find a first task, and the "Project history" section shows the kind of bug that tends to hide in this codebase (silent failures inside async or cross-language boundaries) so you know what to watch for when reviewing your own changes.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the full file map, real code from every subsystem, local setup steps, and common contribution workflows. The "Known issues" list above is a reasonable place to find a first task, and the "Project history" section shows the kind of bug that tends to hide in this codebase (silent failures inside async or cross-language boundaries) so you know what to watch for when reviewing your own changes.

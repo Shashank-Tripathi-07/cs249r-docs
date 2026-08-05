@@ -1,6 +1,6 @@
 # Hardware Kits: Design
 
-*This is the contributor-facing design document for Hardware Kits, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `kits/` in that repo. It explains what Hardware Kits is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](kits-implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05).*
+*This is the contributor-facing design document for Hardware Kits, a sub-project of `harvard-edge/cs249r_book` (the "Machine Learning Systems" repository), living at `kits/` in that repo. It explains what Hardware Kits is, why it exists, how its pieces fit together, and what every technology in the stack is for. Read this before your first contribution; read [the implementation reference](implementation.md) when you're ready to touch code. Both documents describe the project as it actually exists on `dev` HEAD (commit `8fb87d81`, 2026-08-05).*
 
 ## Problem
 
@@ -76,4 +76,4 @@ No specific historical incidents or past-bug narratives were surfaced during res
 
 ## Contributing
 
-Once you understand the shape of the project from this document, the [implementation reference](kits-implementation.md) is where you'll actually work: it has the file map, the real `Makefile` targets and config-switching mechanism, the VS Code extension's actual command set, local setup steps, and common contribution workflows for adding a new lab or a new platform.
+Once you understand the shape of the project from this document, the [implementation reference](implementation.md) is where you'll actually work: it has the file map, the real `Makefile` targets and config-switching mechanism, the VS Code extension's actual command set, local setup steps, and common contribution workflows for adding a new lab or a new platform.

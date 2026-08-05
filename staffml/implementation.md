@@ -1,6 +1,6 @@
 # StaffML: Implementation Reference
 
-> **Status: as-built, contributor-facing.** StaffML is a live, already-implemented app. This document is your map for reading and modifying the real source: file paths, line numbers, and representative code pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-04). Read the [design doc](staffml-design.md) first for the "what and why"; this doc is the "where and how." Section 11, "Common contribution workflows," is the fastest way in if you already know what you want to change.
+> **Status: as-built, contributor-facing.** StaffML is a live, already-implemented app. This document is your map for reading and modifying the real source: file paths, line numbers, and representative code pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-04). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how." Section 11, "Common contribution workflows," is the fastest way in if you already know what you want to change.
 
 ## Prerequisites
 

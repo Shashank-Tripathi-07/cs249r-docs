@@ -1,6 +1,6 @@
 # Lecture Slides: Implementation Reference
 
-> **Status: as-built, contributor-facing.** The Lecture Slides project is a live, already-implemented collection of 35 chapter decks plus a web portal. This document is your map for reading and modifying the real source: file paths and representative build commands pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](slides-design.md) first for the "what and why"; this doc is the "where and how."
+> **Status: as-built, contributor-facing.** The Lecture Slides project is a live, already-implemented collection of 35 chapter decks plus a web portal. This document is your map for reading and modifying the real source: file paths and representative build commands pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how."
 
 ## Prerequisites
 

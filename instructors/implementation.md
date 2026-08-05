@@ -1,6 +1,6 @@
 # The Blueprint (Instructor Site): Implementation Reference
 
-> **Status: as-built, contributor-facing.** The instructor site is a live, already-published Quarto site. This document is your map for reading and modifying the real source: file paths and real configuration pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](instructors-design.md) first for the "what and why"; this doc is the "where and how."
+> **Status: as-built, contributor-facing.** The instructor site is a live, already-published Quarto site. This document is your map for reading and modifying the real source: file paths and real configuration pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-05). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how."
 
 ## Prerequisites
 

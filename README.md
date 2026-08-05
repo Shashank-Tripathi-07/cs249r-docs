@@ -4,83 +4,83 @@ Contributor-facing design and implementation documentation for sub-projects of [
 
 New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to.
 
-## The book
+## [`book/`](book/)
 
 The core two-volume textbook, plus its custom build/validate/publish tooling (the "Binder" CLI).
 
-- [`book-design.md`](book-design.md)
-- [`book-implementation.md`](book-implementation.md)
+- [`design.md`](book/design.md)
+- [`implementation.md`](book/implementation.md)
 
-## StaffML
+## [`staffml/`](staffml/)
 
 Interview-prep question bank and practice app.
 
-- [`staffml-design.md`](staffml-design.md)
-- [`staffml-implementation.md`](staffml-implementation.md)
+- [`design.md`](staffml/design.md)
+- [`implementation.md`](staffml/implementation.md)
 
-## TinyTorch
+## [`tinytorch/`](tinytorch/)
 
 Hands-on course where students build an ML framework from scratch.
 
-- [`tinytorch-design.md`](tinytorch-design.md)
-- [`tinytorch-implementation.md`](tinytorch-implementation.md)
+- [`design.md`](tinytorch/design.md)
+- [`implementation.md`](tinytorch/implementation.md)
 
-## MLSys·im
+## [`mlsysim/`](mlsysim/)
 
 First-principles analytical modeling framework for ML systems, also the physics engine behind the browser-based interactive labs.
 
-- [`mlsysim-design.md`](mlsysim-design.md)
-- [`mlsysim-implementation.md`](mlsysim-implementation.md)
+- [`design.md`](mlsysim/design.md)
+- [`implementation.md`](mlsysim/implementation.md)
 
-## Hardware Kits
+## [`kits/`](kits/)
 
 Hands-on embedded ML labs for real devices (Arduino, Seeed, Raspberry Pi).
 
-- [`kits-design.md`](kits-design.md)
-- [`kits-implementation.md`](kits-implementation.md)
+- [`design.md`](kits/design.md)
+- [`implementation.md`](kits/implementation.md)
 
-## MLPerf EDU
+## [`mlperf-edu/`](mlperf-edu/)
 
 A locally executable, quality-gated benchmark specification adapted from MLPerf's own discipline for classroom use.
 
-- [`mlperf-edu-design.md`](mlperf-edu-design.md)
-- [`mlperf-edu-implementation.md`](mlperf-edu-implementation.md)
+- [`design.md`](mlperf-edu/design.md)
+- [`implementation.md`](mlperf-edu/implementation.md)
 
-## Socratiq
+## [`socratiq/`](socratiq/)
 
 An embeddable, AI-powered learning widget for static HTML pages.
 
-- [`socratiq-design.md`](socratiq-design.md)
-- [`socratiq-implementation.md`](socratiq-implementation.md)
+- [`design.md`](socratiq/design.md)
+- [`implementation.md`](socratiq/implementation.md)
 
-## ML Systems Design Grammar
+## [`design-grammar/`](design-grammar/)
 
 A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques from first principles.
 
-- [`design-grammar-design.md`](design-grammar-design.md)
-- [`design-grammar-implementation.md`](design-grammar-implementation.md)
+- [`design.md`](design-grammar/design.md)
+- [`implementation.md`](design-grammar/implementation.md)
 
-## Lecture Slides
+## [`slides/`](slides/)
 
 35 Beamer decks (Volumes I and II) plus packaged TinyML courseware.
 
-- [`slides-design.md`](slides-design.md)
-- [`slides-implementation.md`](slides-implementation.md)
+- [`design.md`](slides/design.md)
+- [`implementation.md`](slides/implementation.md)
 
-## The Blueprint (Instructor Site)
+## [`instructors/`](instructors/)
 
-Syllabi, pedagogy, assessment, and TA guidance for adopting instructors.
+"The Blueprint": syllabi, pedagogy, assessment, and TA guidance for adopting instructors.
 
-- [`instructors-design.md`](instructors-design.md)
-- [`instructors-implementation.md`](instructors-implementation.md)
+- [`design.md`](instructors/design.md)
+- [`implementation.md`](instructors/implementation.md)
 
-## Landing and Community Site
+## [`site/`](site/)
 
 The ecosystem's public front door: home, about, community, newsletter, and mini-games.
 
-- [`site-design.md`](site-design.md)
-- [`site-implementation.md`](site-implementation.md)
+- [`design.md`](site/design.md)
+- [`implementation.md`](site/implementation.md)
 
 ---
 
-Start with each project's design doc, then use its implementation doc as your map once you're ready to make a change. All documents describe their project as of `dev` HEAD (commit `8fb87d81`) in the main repository.
+Start with each project's `design.md`, then use its `implementation.md` as your map once you're ready to make a change. All documents describe their project as of `dev` HEAD (commit `8fb87d81`) in the main repository.
