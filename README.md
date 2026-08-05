@@ -2,6 +2,8 @@
 
 Contributor-facing design and implementation documentation for sub-projects of [`harvard-edge/cs249r_book`](https://github.com/harvard-edge/cs249r_book) (the "Machine Learning Systems" course repository).
 
+New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to.
+
 ## The book
 
 The core two-volume textbook, plus its custom build/validate/publish tooling (the "Binder" CLI).
