@@ -2,7 +2,7 @@
 
 Contributor-facing design and implementation documentation for sub-projects of [`harvard-edge/cs249r_book`](https://github.com/harvard-edge/cs249r_book) (the "Machine Learning Systems" course repository).
 
-New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to. Keep [`glossary.md`](glossary.md) open alongside whatever you're reading; it defines every recurring technical term in plain language, from Quarto and Pyodide to the roofline model and CORS. If you're debugging a CI failure or a red badge, [`ci-workflows.md`](ci-workflows.md) inventories all 66 GitHub Actions workflows in the main repo, per-project and repo-wide, with two real, verified bugs in the current CI system documented at the end.
+New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to. Keep [`glossary.md`](glossary.md) open alongside whatever you're reading; it defines every recurring technical term in plain language, from Quarto and Pyodide to the roofline model and CORS. If you're debugging a CI failure or a red badge, [`ci-workflows.md`](ci-workflows.md) inventories all 66 GitHub Actions workflows in the main repo, per-project and repo-wide, with two real, verified bugs in the current CI system documented at the end; each project's own `ci-workflows.md` (linked below) covers just that project's workflows.
 
 ## [`book/`](book/)
 
@@ -10,6 +10,7 @@ The core two-volume textbook, plus its custom build/validate/publish tooling (th
 
 - [`design.md`](book/design.md)
 - [`implementation.md`](book/implementation.md)
+- [`ci-workflows.md`](book/ci-workflows.md)
 
 ## [`staffml/`](staffml/)
 
@@ -18,6 +19,7 @@ Interview-prep question bank and practice app.
 - [`design.md`](staffml/design.md)
 - [`implementation.md`](staffml/implementation.md)
 - [`system_design.md`](staffml/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the vault pipeline or the Workers backend.
+- [`ci-workflows.md`](staffml/ci-workflows.md)
 
 ## [`tinytorch/`](tinytorch/)
 
@@ -26,6 +28,7 @@ Hands-on course where students build an ML framework from scratch.
 - [`design.md`](tinytorch/design.md)
 - [`implementation.md`](tinytorch/implementation.md)
 - [`system_design.md`](tinytorch/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the export pipeline or the milestone system.
+- [`ci-workflows.md`](tinytorch/ci-workflows.md)
 
 ## [`mlsysim/`](mlsysim/)
 
@@ -34,12 +37,14 @@ First-principles analytical modeling framework for ML systems, also the physics 
 - [`design.md`](mlsysim/design.md)
 - [`implementation.md`](mlsysim/implementation.md)
 - [`system_design.md`](mlsysim/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the physics core or a solver backend.
+- [`ci-workflows.md`](mlsysim/ci-workflows.md)
 
 ## [`labs/`](labs/)
 
 The 34 browser-based interactive labs (Volumes I and II), built on the mlsysim engine and exported to WASM via marimo.
 
 - [`system_design.md`](labs/system_design.md): dependencies, components, the export and boot sequence, and progress persistence, for a contributor adding a lab or debugging the WASM path. Labs share their product framing with [`mlsysim/design.md`](mlsysim/design.md), there is no separate `design.md` for this folder.
+- [`ci-workflows.md`](labs/ci-workflows.md)
 
 ## [`kits/`](kits/)
 
@@ -47,6 +52,7 @@ Hands-on embedded ML labs for real devices (Arduino, Seeed, Raspberry Pi).
 
 - [`design.md`](kits/design.md)
 - [`implementation.md`](kits/implementation.md)
+- [`ci-workflows.md`](kits/ci-workflows.md)
 
 ## [`mlperf-edu/`](mlperf-edu/)
 
@@ -54,6 +60,7 @@ A locally executable, quality-gated benchmark specification adapted from MLPerf'
 
 - [`design.md`](mlperf-edu/design.md)
 - [`implementation.md`](mlperf-edu/implementation.md)
+- [`ci-workflows.md`](mlperf-edu/ci-workflows.md)
 
 ## [`socratiq/`](socratiq/)
 
@@ -61,6 +68,7 @@ An embeddable, AI-powered learning widget for static HTML pages.
 
 - [`design.md`](socratiq/design.md)
 - [`implementation.md`](socratiq/implementation.md)
+- [`ci-workflows.md`](socratiq/ci-workflows.md)
 
 ## [`design-grammar/`](design-grammar/)
 
@@ -68,6 +76,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 
 - [`design.md`](design-grammar/design.md)
 - [`implementation.md`](design-grammar/implementation.md)
+- [`ci-workflows.md`](design-grammar/ci-workflows.md)
 
 ## [`slides/`](slides/)
 
@@ -75,6 +84,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 
 - [`design.md`](slides/design.md)
 - [`implementation.md`](slides/implementation.md)
+- [`ci-workflows.md`](slides/ci-workflows.md)
 
 ## [`instructors/`](instructors/)
 
@@ -82,6 +92,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 
 - [`design.md`](instructors/design.md)
 - [`implementation.md`](instructors/implementation.md)
+- [`ci-workflows.md`](instructors/ci-workflows.md)
 
 ## [`site/`](site/)
 
@@ -89,6 +100,7 @@ The ecosystem's public front door: home, about, community, newsletter, and mini-
 
 - [`design.md`](site/design.md)
 - [`implementation.md`](site/implementation.md)
+- [`ci-workflows.md`](site/ci-workflows.md)
 
 ---
 

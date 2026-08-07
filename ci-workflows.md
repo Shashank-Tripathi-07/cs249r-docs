@@ -54,83 +54,87 @@ The orchestrator also deliberately carries no workflow-level concurrency lock. E
 
 ## 3. Per-project workflows
 
-### Book (`book/`)
+Each project's full workflow table now lives in its own folder, right next to its `design.md`, so it travels with the rest of that project's documentation instead of only existing in this one cross-cutting file. What follows is a collapsed summary per project, click to expand, or follow the link straight to the standalone file.
 
-| Workflow | Trigger | What it does |
-|---|---|---|
-| `book-validate-dev.yml` | push to dev, PR, dispatch | Pre-commit hooks, then a full container-based build matrix (see below). |
-| `book-build-container.yml` | `workflow_call`, dispatch | Reusable matrix build: up to 12 parallel jobs (2 volumes x 3 formats x 2 OS) using pre-built Docker containers so contributors and CI never pay the 30 to 45 minute native dependency-install cost. |
-| `book-preview-dev.yml` | `workflow_run` after Validate succeeds, dispatch | Downloads the validated artifacts, assembles the staging site, deploys via SSH. |
-| `book-publish-live.yml` | dispatch only, requires "PUBLISH" | Merges dev into main, rebuilds via the container matrix, deploys to `gh-pages`, tags a release, generates AI-assisted release notes, reverts the merge automatically on failure or timeout. |
+<details>
+<summary><strong>Book</strong> (<code>book/</code>), 4 workflows, standard triad plus a reusable container build matrix</summary>
 
-design-grammar is referenced inside `book-validate-dev.yml` rather than having any workflow file of its own, see section 5.
+Full detail: [`book/ci-workflows.md`](book/ci-workflows.md)
 
-### Kits (`kits/`)
+`book-validate-dev.yml` runs pre-commit then a 12-job container build matrix (`book-build-container.yml`, reusable). `book-preview-dev.yml` deploys the validated artifacts to staging. `book-publish-live.yml` merges dev into main, rebuilds, tags, and generates AI-assisted release notes, reverting automatically on failure.
+</details>
 
-`kits-validate-dev.yml` (image-reference checks, Quarto build, PDF compile via the reusable `kits-build-pdfs.yml`), `kits-preview-dev.yml`, `kits-publish-live.yml`. Standard triad plus one reusable PDF builder.
+<details>
+<summary><strong>Kits</strong> (<code>kits/</code>), standard triad plus one reusable PDF builder</summary>
 
-### TinyTorch (`tinytorch/`)
+Full detail: [`kits/ci-workflows.md`](kits/ci-workflows.md)
 
-| Workflow | What it does |
-|---|---|
-| `tinytorch-validate-dev.yml` | A 7-stage progressive suite: inline build from `src/`, unit tests, integration tests, CLI tests (three of these run in parallel), then end-to-end tests gated on all three, then a Docker-based fresh-install simulation, then a destructive full user-journey test reserved for explicit `all`/`user-journey` runs. Matrixed across Ubuntu and Windows (Windows runs everything through Git Bash for cross-platform shell compatibility). |
-| `tinytorch-build-pdfs.yml` | Reusable: builds the Lab Guide (Quarto to XeLaTeX, reusing the same `.qmd` chapter sources the website uses) and the Research Paper (LuaLaTeX) independently. |
-| `tinytorch-preview-dev.yml` | Gated on Validate succeeding via `workflow_run`, deploys the guide, paper, and slide downloads to staging. |
-| `tinytorch-publish-live.yml` | Full semantic-versioning release: computes the next version from `tinytorch-v*` tags, runs the full validate suite as a preflight, bumps the version across six files, merges dev into main, builds PDFs, deploys, tags, drafts a GitHub Release. Supports a `site_only` mode that skips version bump, tag, and PDFs entirely for a pure content refresh. |
-| `tinytorch-update-pdfs.yml` | Rebuilds and redeploys just the PDFs, no site rebuild, no version bump, for when only PDF content changed. |
+`kits-validate-dev.yml`, `kits-build-pdfs.yml` (reusable), `kits-preview-dev.yml`, `kits-publish-live.yml`.
+</details>
 
-### MLSys·im (`mlsysim/`)
+<details>
+<summary><strong>TinyTorch</strong> (<code>tinytorch/</code>), a 7-stage progressive test suite matrixed across Ubuntu and Windows</summary>
 
-Standard triad (`mlsysim-validate-dev.yml` runs pytest plus a docs-site build; `mlsysim-preview-dev.yml`; `mlsysim-publish-live.yml`) plus two extras genuinely worth knowing about:
+Full detail: [`tinytorch/ci-workflows.md`](tinytorch/ci-workflows.md)
 
-- **`mlsysim-pypi-publish.yml`**: triggered by pushing a `mlsysim-v*` tag, not by anything in the publish-live chain. Runs the full pytest suite across Python 3.10 through 3.13 in parallel, builds a wheel and sdist, publishes to PyPI via Trusted Publishing (OIDC, no stored PyPI token anywhere in the repo), then does a genuine post-publish smoke test: installs the just-published package from real PyPI (with retry for CDN propagation delay), imports it, and runs a CLI smoke check, before creating the GitHub Release and dispatching `mlsysim-publish-live.yml` to refresh the docs site. This is the only publish pipeline in the whole repo that verifies its own artifact after shipping it, rather than trusting the build step succeeded.
-- **`mlsysim-update-pdfs.yml`**: same PDF-only-refresh pattern as TinyTorch's equivalent, for the research paper and the four ISCA tutorial slide-deck PDFs.
+`tinytorch-validate-dev.yml` runs inline build, unit, integration, and CLI tests in parallel, then end-to-end, a Docker fresh-install simulation, and an optional destructive full user-journey stage. `tinytorch-publish-live.yml` handles full semantic-versioning releases with a `site_only` escape hatch for pure content refreshes.
+</details>
 
-### Labs (`labs/`)
+<details>
+<summary><strong>MLSys·im</strong> (<code>mlsysim/</code>), standard triad plus PyPI publishing with a real post-publish smoke test</summary>
 
-Covered in depth in [`labs/system_design.md`](labs/system_design.md) section 5 and 6. In summary: `labs-validate-dev.yml` runs notebook static analysis, a Quarto site build, and the WASM smoke test tier (build both wheels, export representative labs, run them in real headless Chromium via Playwright). `labs-preview-dev.yml` and `labs-publish-live.yml` both export every lab notebook to WASM HTML and deploy the result. A real, verified bug in this workflow is documented in section 6 below.
+Full detail: [`mlsysim/ci-workflows.md`](mlsysim/ci-workflows.md)
 
-### StaffML (`interviews/staffml/` and related)
+`mlsysim-pypi-publish.yml` is the only publish pipeline in the whole repo that installs its own just-published package from real PyPI and smoke-tests it before declaring success.
+</details>
 
-This project has the most workflows of any single sub-project, seven in total, because its surface area (a Next.js frontend, a content pipeline, two Cloudflare Workers, and a research paper) is genuinely wider than a single Quarto site.
+<details>
+<summary><strong>Labs</strong> (<code>labs/</code>), WASM smoke test tier, plus one real verified bug</summary>
 
-| Workflow | What it does |
-|---|---|
-| `staffml-validate-dev.yml` | `tsc` plus unit tests, a Next.js static build, vault/corpus smoke checks, and a Playwright E2E pass. |
-| `staffml-validate-vault.yml` | The data-layer counterpart: ruff, mypy, and pytest on `vault-cli`; `vault check --strict` (9 structural invariants); a release-hash equivalence check; `vault codegen --check` (the hash-drift guard covered in [`staffml/system_design.md`](staffml/system_design.md) section 7); a registry append-only check; and `vitest` on the vault Worker. |
-| `staffml-preview-dev.yml` | Runs both validate workflows and its own build job in parallel, deploys only once all three succeed. |
-| `staffml-publish-live.yml` | Full production deploy, including a `/interviews/` redirect kept for backward compatibility with the pre-rename URL. |
-| `staffml-auto-pr.yml` | When an issue is labeled `action: auto-pr`, generates a flashcard from the issue body and opens a PR against dev automatically. |
-| `staffml-chain-rebuild.yml` | Opt-in (dispatch only, cron intentionally disabled until it proves stable), regenerates question-chain groupings via Gemini and opens a PR with the delta rather than mutating `chains.json` directly. |
-| `staffml-audit-corpus-monthly.yml` | Scheduled Gemini-driven quality audit of the full published corpus, roughly 315 LLM calls per run. As of this document, its own header comment states the schedule cannot actually fire yet, the runner has no `gemini` CLI installed, so only a manual dispatch would currently succeed, and that would fail too until the auth path is wired. This is a real, currently-inert workflow, not a hypothetical one. |
-| `staffml-update-paper.yml` | Rebuilds the StaffML research paper PDF from LaTeX and the current corpus stats. |
-| `staffml-welcome.yml` | Posts a welcome comment on a contributor's first PR touching `interviews/`. |
+Full detail: [`labs/ci-workflows.md`](labs/ci-workflows.md)
 
-The section 6 write-up on the `staffml-validate-vault.yml` concurrency fix is directly relevant to why this project's README badge has historically gone red for reasons unrelated to real test failures.
+`labs-validate-dev.yml` builds wheels, exports representative labs to WASM, and runs them in real headless Chromium. Its dependency install step has no upper pin on `marimo`, which silently broke the job for weeks when `marimo` added a `uv` requirement, see the per-project file for the full trace.
+</details>
 
-### Slides (`slides/`)
+<details>
+<summary><strong>StaffML</strong> (<code>interviews/staffml/</code>), 7 workflows, the widest surface area of any sub-project, plus one real verified bug</summary>
 
-`slides-validate-dev.yml` (SVG well-formedness, Quarto portal build, LaTeX frame-matching check), `slides-build-pdfs.yml` (compiles all 35 Beamer decks via xelatex plus Inkscape, converts to PPTX for presenter mode), `slides-preview-dev.yml` (portal HTML only, no PDF compile), `slides-publish-live.yml` (full PDF build plus a GitHub Release with ZIP archives plus the portal deploy).
+Full detail: [`staffml/ci-workflows.md`](staffml/ci-workflows.md)
 
-### MLPerf EDU (`mlperf-edu/`)
+Site validation, vault data-layer validation, an opt-in Gemini-driven chain rebuild, a currently-inert monthly corpus audit (no `gemini` CLI on the runner yet), and the auto-PR/welcome-comment bots. A `github.workflow`-based concurrency collision used to make the vault validate job cancel itself against the site validate job on every single push, see the per-project file for the fix.
+</details>
 
-The odd one out in naming convention (no emoji prefix, slightly different structure) and in scope: its own header comments are explicit that this publishes documentation only, not a benchmark result, a Python package, or anything implying MLCommons endorsement.
+<details>
+<summary><strong>Slides</strong> (<code>slides/</code>), 35 Beamer decks compiled to PDF and PPTX</summary>
 
-| Workflow | What it does |
-|---|---|
-| `mlperf-edu-validate-dev.yml` | Fast, blocking smoke validation, the workload entry points and the smoke path, not a full benchmark run. |
-| `mlperf-edu-release-validation.yml` | The real, evidence-bearing benchmark execution, with a five-hour hard timeout, run weekly on schedule or manually with a `release`/`max`/`pro` preset. Its header comment is explicit that a dry run is never reported as a real max or release validation, a direct statement that this project cares about not letting a smoke test masquerade as a real benchmark result. |
-| `mlperf-edu-preview-dev.yml`, `mlperf-edu-publish-live.yml` | The usual preview/publish pair, deploying the documentation preview only. |
+Full detail: [`slides/ci-workflows.md`](slides/ci-workflows.md)
 
-Two of the three mlperf-edu Dependabot PRs I traced earlier this project's CI failures back to a stale workload-registry count assertion and a missing `matplotlib` test dependency, both in `mlperf-edu-validate-dev.yml`'s own test suite, unrelated to whatever dependency bump was under review at the time.
+`slides-validate-dev.yml`, `slides-build-pdfs.yml`, `slides-preview-dev.yml` (portal only, no PDFs), `slides-publish-live.yml` (full PDF build plus a GitHub Release).
+</details>
 
-### Site (`site/`)
+<details>
+<summary><strong>MLPerf EDU</strong> (<code>mlperf-edu/</code>), documentation-only publishing, plus a recurring non-code CI failure</summary>
 
-`site-validate-dev.yml` (Quarto build plus a non-blocking Tier 2 link check, added specifically because `site-preview-dev.yml` used to jump straight to building and deploying with no validation gate at all), `site-preview-dev.yml`, `site-publish-live.yml` (both sync newsletter content from Buttondown before building). A third workflow, `site-refresh-stats.yml`, runs every six hours and writes only `gh-pages/stats.json`, deliberately not `dev`, specifically so a scheduled bot commit never leaves every contributor's local checkout behind, and any missing secret (GA4, Buttondown, GitHub) degrades to the previously committed value rather than failing the run.
+Full detail: [`mlperf-edu/ci-workflows.md`](mlperf-edu/ci-workflows.md)
 
-### Instructors (`instructors/`)
+Explicitly does not imply MLCommons endorsement or publish a benchmark result. `mlperf-edu-release-validation.yml` is the real, evidence-bearing benchmark run (5-hour timeout); `mlperf-edu-validate-dev.yml` is fast smoke validation only. Several Dependabot PRs against this project showed red CI from two pre-existing test bugs unrelated to the dependency bump, see the per-project file.
+</details>
 
-Standard triad, `instructors-validate-dev.yml`, `instructors-preview-dev.yml`, `instructors-publish-live.yml`, validating image references and the Quarto build, nothing unusual in its shape.
+<details>
+<summary><strong>Site</strong> (<code>site/</code>), the unified landing/about/community/newsletter site</summary>
+
+Full detail: [`site/ci-workflows.md`](site/ci-workflows.md)
+
+`site-validate-dev.yml`, `site-preview-dev.yml`, `site-publish-live.yml`, plus `site-refresh-stats.yml` (writes only `gh-pages/stats.json` every 6 hours) and `sync-newsletter.yml` (daily Buttondown sync, dispatches the real publish workflow rather than deploying itself, after a past partial-deploy corrupted shared CSS).
+</details>
+
+<details>
+<summary><strong>Instructors</strong> (<code>instructors/</code>), standard triad, nothing unusual</summary>
+
+Full detail: [`instructors/ci-workflows.md`](instructors/ci-workflows.md)
+
+`instructors-validate-dev.yml`, `instructors-preview-dev.yml`, `instructors-publish-live.yml`.
+</details>
 
 ## 4. Repo-wide and infrastructure workflows
 
@@ -165,8 +169,8 @@ These do not belong to any single project. Grouped by what they actually manage:
 
 Two documented sub-projects have no `validate-dev`/`preview-dev`/`publish-live` triad of their own, confirmed by grepping the full workflow directory, not inferred from absence alone:
 
-- **design-grammar** is referenced only inside `book-validate-dev.yml` and `auto-label.yml`. It has no independent build or deploy pipeline, its content is validated as part of the book's own pipeline rather than standalone.
-- **socratiq** has exactly one workflow, `socratiq-bundle-drift.yml`, and it is a guard, not a deploy pipeline. socratiq is not an independently deployed site, it ships as a pre-built `bundle.js` embedded into the book's own build (`book/quarto/tools/scripts/socratiQ/bundle.js`), and this workflow's entire job is to rebuild that bundle from source on any relevant PR and fail if the committed bundle has drifted from what the source actually produces. This is exactly the check that flagged real drift on two Dependabot PRs (`linkify-it` and `dompurify`) traced in detail while reviewing this repo's open PRs, both bumped a version Dependabot could update in `package.json` but had no way to rebuild the bundle for, so the check correctly caught that the shipped code would not have matched the new dependency version.
+- **design-grammar** (full detail: [`design-grammar/ci-workflows.md`](design-grammar/ci-workflows.md)) is referenced only inside `book-validate-dev.yml` and `auto-label.yml`. It has no independent build or deploy pipeline, its content is validated as part of the book's own pipeline rather than standalone.
+- **socratiq** (full detail: [`socratiq/ci-workflows.md`](socratiq/ci-workflows.md)) has exactly one workflow, `socratiq-bundle-drift.yml`, and it is a guard, not a deploy pipeline. socratiq is not an independently deployed site, it ships as a pre-built `bundle.js` embedded into the book's own build (`book/quarto/tools/scripts/socratiQ/bundle.js`), and this workflow's entire job is to rebuild that bundle from source on any relevant PR and fail if the committed bundle has drifted from what the source actually produces. This is exactly the check that flagged real drift on two Dependabot PRs (`linkify-it` and `dompurify`) traced in detail while reviewing this repo's open PRs, both bumped a version Dependabot could update in `package.json` but had no way to rebuild the bundle for, so the check correctly caught that the shipped code would not have matched the new dependency version.
 
 ## 6. Two real, verified bugs in this CI system
 
