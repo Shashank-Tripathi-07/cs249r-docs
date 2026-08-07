@@ -15,9 +15,53 @@ A lab has to run two genuinely different lives from one source file: a native Py
 | `mlsysim` (built as a wheel for WASM, installed from source for native dev) | `mlsysim/pyproject.toml`, pinned `0.1.2` | The simulation engine every lab calls into. Version pin in the wheel filename baked into each lab's first cell has to track the pin in `mlsysim/pyproject.toml`, or a lab installs a mismatched engine. |
 | `mlsysim.labs` (the `mlsysbook-labs` package, `labs/pyproject.toml`) | declared with zero runtime dependencies of its own | A UI-and-persistence helper package, not a second engine. Supplies `DesignLedger`, the shared card/metric/roofline widgets, and the shared color and CSS theme every lab imports so 34 notebooks do not each reinvent their own layout. |
 | `plotly>=6.7.0`, `numpy>=1.24.0` | `labs/requirements.txt` | Direct plotting and numeric dependencies used inside lab cells, separate from whatever `mlsysim` itself pulls in. |
-| `pytest>=8.0.0` | `labs/requirements.txt` | Runs the five-tier test suite described in section 4. |
+| `pytest>=8.0.0` | `labs/requirements.txt` | Runs the five-tier test suite described in section 5. |
 
-## 3. Component inventory
+## 3. Full system diagram
+
+```mermaid
+flowchart TD
+    Contributor(["🧑‍💻 Contributor, native dev"])
+    Student(["🎓 Student, browser"])
+
+    LabFile[("Lab .py file<br/>marimo.App")]
+    Cell0{"Cell 0:<br/>sys.platform ==<br/>'emscripten' ?"}
+    Bootstrap["bootstrap.py<br/>native_bootstrap()"]
+    Micropip["micropip.install()<br/>wheels + pure deps"]
+    Toolkit["mlsysim.labs toolkit<br/>state.py / components.py / style.py"]
+    Engine["mlsysim Engine<br/>solve()"]
+    Ledger["DesignLedger<br/>save() / save_async()"]
+    JSONFile[("~/.mlsys/ledger.json<br/>native")]
+    IDB[("IndexedDB<br/>mlsys_ledger_db<br/>WASM")]
+    CI["CI: wasm-smoke-test<br/>build wheels, marimo export,<br/>Playwright + Chromium"]
+
+    Contributor --> Bootstrap
+    Student --> Micropip
+    LabFile --> Cell0
+    Cell0 -->|no, native| Bootstrap --> Toolkit
+    Cell0 -->|yes, WASM| Micropip --> Toolkit
+    Toolkit --> Engine
+    Toolkit --> Ledger
+    Ledger -->|native| JSONFile
+    Ledger -->|WASM, via JS bridge| IDB
+    LabFile -.-> CI
+
+    classDef client fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#1a3c6e
+    classDef core fill:#fef3e0,stroke:#f29900,stroke-width:2px,color:#7a4a00
+    classDef storage fill:#f3e8fd,stroke:#a142f4,stroke-width:2px,color:#4a1a7a
+    classDef decision fill:#fde7e9,stroke:#d93025,stroke-width:2px,color:#7a1a1a
+    classDef ci fill:#f1f3f4,stroke:#5f6368,stroke-width:2px,color:#3c4043,stroke-dasharray: 4 3
+
+    class Contributor,Student client
+    class Bootstrap,Micropip,Toolkit,Engine,Ledger core
+    class LabFile,JSONFile,IDB storage
+    class Cell0 decision
+    class CI ci
+```
+
+The red diamond is the one decision every lab makes, and it is the only place native and WASM code paths diverge. Everything below the toolkit box runs identically regardless of which branch was taken. The dashed line to CI represents a check, not a runtime dependency, the WASM smoke test consumes the same lab file a student's browser does, it does not sit in the path between them.
+
+## 4. Component inventory
 
 ```
                          labs/vol1/lab_00_introduction.py
@@ -47,9 +91,9 @@ A lab has to run two genuinely different lives from one source file: a native Py
 Alongside the labs themselves and the shared toolkit, two more pieces matter:
 
 - **`labs/bootstrap.py`**, a native-only convenience shim. `native_bootstrap(lab_file)` puts the repository root and `mlsysim/` onto `sys.path` so a lab can `import mlsysim` from source during local editing. It is an explicit no-op under WASM (`sys.platform == "emscripten"`), and it cannot run inside a WASM export in the first place, because marimo's `html-wasm` export bundles only the notebook file itself.
-- **The five-tier test suite** under `labs/tests/`, described fully in section 4.
+- **The five-tier test suite** under `labs/tests/`, described fully in section 5.
 
-## 4. The five test tiers and what each one actually catches
+## 5. The five test tiers and what each one actually catches
 
 ```
 Level 1  test_static.py    static analysis, no execution
@@ -66,7 +110,7 @@ Level 1 through 4 run against the native Python module, imported directly. Level
 
 `test_wasm_persistence.py` is narrower and newer: it exists specifically to catch a class of bug where `DesignLedger.save_async()` reports success while the write silently never lands in IndexedDB (issue #1985). It runs the real, unmodified `save_async()` against a real Pyodide runtime and real IndexedDB in headless Chromium, then reads the result back through a second, independent connection, five separate trials, rather than trusting the save call's own return value.
 
-## 5. Export and boot sequence, from source file to a running tab
+## 6. Export and boot sequence, from source file to a running tab
 
 ```
 CI job "wasm-smoke-test" (labs-validate-dev.yml)
@@ -101,7 +145,7 @@ The wheel filenames baked into each lab's Cell 0 have to match what the CI build
 
 Everything downstream of Cell 0 is identical code in both environments. There is no separate production notebook and no forked logic for the physics, the widgets, or the save behavior. The only structural difference between a contributor's local session and a student's browser session is that one conditional branch, and `test_static.py`'s `test_wasm_bootstrap` check enforces, by literal string match, that the branch exists verbatim in every lab file.
 
-## 6. Progress persistence: input, storage, and the JS bridge
+## 7. Progress persistence: input, storage, and the JS bridge
 
 `DesignLedger` is the one persistence path every lab uses, through `save(track=..., step=..., design=..., chapter=...)`. A call first mutates the in-memory `LedgerState` (`track`, `current_step`, `history[step_id]`), synchronously, regardless of environment. What happens next branches:
 
@@ -132,7 +176,7 @@ The WASM save is fire-and-forget by design (a lab's UI cannot block on a full In
 
 Native persistence is the simpler of the two paths on purpose: a JSON file at `~/.mlsys/ledger.json`, written and read with the standard library, no browser storage API involved, since a native session has no browser to talk to.
 
-## 7. Error handling
+## 8. Error handling
 
 Both the native and WASM load paths fail the same way on purpose: on any exception, `LedgerState` resets to a fresh, empty default rather than raising. This is the correct behavior for "no prior save exists" and the wrong behavior for "a save exists but could not be read", and the two cases currently cannot be told apart from the caller's side, which is tracked as a known, separate gap in the read path (see `../mlsysim/design.md`'s known issues section, not duplicated here).
 
@@ -140,7 +184,7 @@ On the write side, `save_async()`'s background task failure is captured explicit
 
 `browser_smoke.py` treats any unexpected browser console error, any failed page load within its timeouts, or any missing expected UI element as a hard failure of that lab, there is no partial-credit or warning-only outcome at this tier.
 
-## 8. How this connects to the rest of the ecosystem
+## 9. How this connects to the rest of the ecosystem
 
 ```
     mlsysim source            mlsysim wheel
@@ -159,6 +203,6 @@ On the write side, `save_async()`'s background task failure is captured explicit
 
 Local development and CI's native-facing test tiers install `mlsysim` from source, an editable install that always reflects whatever is currently on the branch. The WASM path, both in CI and in what a real student's browser fetches, installs a compiled wheel instead. This means the two code paths can, in principle, drift apart if the wheel build step and the source tree disagree, which is exactly why `browser_smoke.py` exists as a separate, mandatory tier rather than trusting the native test tiers to stand in for the WASM behavior.
 
-## 9. Contributing
+## 10. Contributing
 
 If you are adding a new lab, copy the Cell 0 pattern from an existing lab exactly, do not write your own environment-detection logic. If you are debugging a persistence bug, check `mlsysim/design.md`'s project history first, this exact subsystem has a documented history of subtle, hard-to-reproduce bugs (the plotly-import-order incident, the name-mangling incident), and the fix for a new bug in this area should come with a permanent regression test in the same style as `test_wasm_persistence.py`, not a one-off manual check.

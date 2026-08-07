@@ -20,7 +20,56 @@ A student's work has to move through three representations before it counts as c
 
 One dependency direction is worth stating precisely: `tito` depends on the `tinytorch/` project tree (reads and writes `src/`, `modules/`, `milestones/*.yml`, `.tito/progress.json`) and, in exactly one place, imports the generated `tinytorch` package itself to confirm an export actually produced a real, working symbol rather than an empty file. The `tinytorch` package has no dependency on `tito` at all. It is a plain importable library once exported.
 
-## 3. Component inventory
+## 3. Full system diagram
+
+```mermaid
+flowchart TD
+    Student(["🎓 Student"])
+    CLI["tito CLI dispatcher<br/>tito/main.py"]
+    Workflow["Module Workflow<br/>start / test / complete"]
+    Export["Export Pipeline<br/>export_utils.py + nbdev"]
+    Pkg[("tinytorch package<br/>real importable code")]
+    Tests["pytest<br/>unit + integration"]
+    Milestone["Milestone System<br/>milestone.py"]
+    MFile[(".tito/milestones.json")]
+    PFile[(".tito/progress.json")]
+    Sync["auto_sync_after_completion<br/>submission.py"]
+    Supabase[["Supabase edge function<br/>shared hardcoded URL"]]
+    Dashboard["Community Dashboard<br/>quarto/community/*.html"]
+    CI["CI: tito dev test --ci<br/>--ci flag skips network sync"]
+
+    Student -->|edits src/*.py| CLI
+    CLI --> Workflow
+    Workflow --> Export
+    Export -->|nb_export| Pkg
+    Workflow --> Tests
+    Tests -->|imports from| Pkg
+    Workflow --> PFile
+    Workflow --> Milestone
+    Milestone -->|imports and checks symbols in| Pkg
+    Milestone --> MFile
+    Workflow --> Sync
+    Milestone --> Sync
+    Sync -->|POST progress and milestones| Supabase
+    Supabase --> Dashboard
+    CI -.->|hard-skips| Sync
+
+    classDef client fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#1a3c6e
+    classDef core fill:#fef3e0,stroke:#f29900,stroke-width:2px,color:#7a4a00
+    classDef storage fill:#f3e8fd,stroke:#a142f4,stroke-width:2px,color:#4a1a7a
+    classDef external fill:#e6f4ea,stroke:#188038,stroke-width:2px,color:#0d4423
+    classDef ci fill:#f1f3f4,stroke:#5f6368,stroke-width:2px,color:#3c4043,stroke-dasharray: 4 3
+
+    class Student client
+    class CLI,Workflow,Export,Tests,Milestone,Sync core
+    class Pkg,MFile,PFile storage
+    class Supabase,Dashboard external
+    class CI ci
+```
+
+Orange boxes are code the CLI runs directly. Purple cylinders are things written to disk or to the generated package. Green boxes are the external, independently-maintained systems the CLI only talks to over HTTP. The dashed line is the one path CI deliberately disables.
+
+## 4. Component inventory
 
 ```
                               tito (console script)
@@ -48,7 +97,7 @@ The five components that matter most for a system-design understanding:
 - **The milestone system** (`tito/commands/milestone.py`), which both gates on completed modules and independently triggers progress sync.
 - **The progress-sync and community dashboard pair** (`tito/core/submission.py` and `tinytorch/quarto/community/`), two separate codebases (Python CLI, static JS site) that agree on nothing except a shared, hardcoded backend URL.
 
-## 4. Data flow: from a student's edit to a real symbol
+## 5. Data flow: from a student's edit to a real symbol
 
 ```
 1. Student edits src/XX_module/XX_module.py
@@ -86,7 +135,7 @@ The five components that matter most for a system-design understanding:
 
 Two steps are easy to miss and worth calling out directly. First, `tito module test <NN>` alone does not run step 5, only `tito module complete <NN>` exports anything, a common point of confusion for a student who assumes testing and completing are the same action. Second, step 8's milestone check does not just look at whether the export step reported success, it separately imports the just-exported module and checks that specific required symbols actually exist, since a file existing and a file containing working code are not the same guarantee.
 
-## 5. Error handling
+## 6. Error handling
 
 ```
 TinyTorchCLIError (base)
@@ -103,7 +152,7 @@ The export pipeline itself does not raise on most failures, it returns structure
 
 The progress-sync path has its own deliberate, non-exception-based error model. `SyncResult` is a dataclass with two independent booleans: `ok`, meaning the server confirmed the write actually persisted, and `accepted`, meaning the server returned success but persistence is unconfirmed. This distinction exists because of a real, previously shipped bug where a 2xx HTTP response with a null or zero synced-module count was reported to the student as a successful sync when nothing had actually synced. `sync_progress` also separates a 401 (attempts a token refresh) from other HTTP errors, from a network-level `URLError`, from a plain timeout, each handled differently rather than collapsed into one generic failure message.
 
-## 6. How the pieces connect
+## 7. How the pieces connect
 
 ```
 export + milestone completion
@@ -126,12 +175,12 @@ The CLI and the dashboard are two independently maintained codebases that agree 
 
 Separately, CI does not go through the same code path a student's local `tito module complete` uses. CI calls `tito dev test` with an explicit `--ci` flag, and that flag is checked directly inside the sync logic to hard-skip any network call during a CI run. This means a bug in the sync path specifically can pass CI cleanly while still being broken for a real student, since CI never actually exercises that code.
 
-## 7. Known coupling worth understanding before you change anything
+## 8. Known coupling worth understanding before you change anything
 
 The module registry (`tito/core/modules.py`) is the single place that maps a module number to a module name, and it is read by the export pipeline, the milestone system's required-modules check, and (per the module docstrings) grading tooling. A change to module numbering has to go through this one file, not be patched independently in each consumer.
 
 The milestone unlock check is not a passive read of the progress file. It actively imports the freshly exported module and checks named attributes exist, which means a milestone can correctly report a module as "exported but not actually working" rather than trusting file existence alone. Any refactor of the export pipeline that changes where a symbol lands needs to be checked against this specific validation, not just against the export step's own success/failure return value.
 
-## 8. Contributing
+## 9. Contributing
 
 If you are changing the export pipeline, run the full chain by hand at least once, edit a real module's dev file, run `tito module complete`, and confirm the resulting file in `tinytorch/` both exists and contains the symbols the milestone system expects. A passing `test_static.py`-equivalent check is not sufficient proof the export actually worked end to end. If you are touching the progress-sync path, remember CI never exercises it, you need to test it manually against a real (or staging) backend, not rely on a green CI run as evidence it still works.

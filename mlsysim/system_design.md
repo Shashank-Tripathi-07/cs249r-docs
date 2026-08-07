@@ -21,7 +21,59 @@ An evaluation has to answer three different kinds of question with one command: 
 
 One detail in the dependency floors is a direct signal of how tightly this package is coupled to the browser labs: the pydantic and numpy version floors are not chosen for their own sake, they are pinned to match exactly what version ships inside the Pyodide runtime, separately for the browser bundle and the Node bundle. This is because Pyodide's package installer cannot upgrade a package that is already present in the runtime, so if `mlsysim`'s floor asked for something newer than what Pyodide ships, installation inside a lab would fail outright.
 
-## 3. Component inventory
+## 3. Full system diagram
+
+```mermaid
+flowchart TD
+    CLIUser(["🧑‍💻 CLI user"])
+    Input[("mlsys.yaml plan<br/>or CLI flags")]
+    Schema["Pydantic schema<br/>EvalNodeSchema /<br/>MlsysPlanSchema"]
+    Registry[("Hardware / Model<br/>registries<br/>YAML-backed")]
+    Pipeline["SystemEvaluator.evaluate()<br/>Pipeline"]
+    Solver1["SingleNodeModel"]
+    Solver2["DistributedModel"]
+    Solver3["EconomicsModel"]
+    OptReg["OptimizationRegistry<br/>lazy backend dispatch"]
+    Backend1["Exhaustive backend"]
+    Backend2["SciPy backend, optional"]
+    Backend3["OR-Tools backend, optional"]
+    Result[("SystemEvaluation<br/>feasibility / performance / macro")]
+    Render["render_scorecard()<br/>text / json / md / html"]
+    ExitCode(["Exit code<br/>0 / 1 / 2 / 3"])
+    Audit["audit_provenance.py<br/>standalone, --scope all --strict"]
+    Wheel[("mlsysim wheel<br/>micropip in Pyodide")]
+
+    CLIUser --> Input --> Schema
+    Schema -->|resolves names against| Registry
+    Schema --> Pipeline
+    Pipeline --> Solver1
+    Pipeline --> Solver2
+    Pipeline --> Solver3
+    Solver2 --> OptReg
+    OptReg --> Backend1
+    OptReg -.-> Backend2
+    OptReg -.-> Backend3
+    Pipeline --> Result --> Render --> ExitCode
+    Registry -.->|checked by| Audit
+    Registry -.->|built into| Wheel
+
+    classDef client fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#1a3c6e
+    classDef core fill:#fef3e0,stroke:#f29900,stroke-width:2px,color:#7a4a00
+    classDef storage fill:#f3e8fd,stroke:#a142f4,stroke-width:2px,color:#4a1a7a
+    classDef optional fill:#e6f4ea,stroke:#188038,stroke-width:2px,color:#0d4423,stroke-dasharray: 4 3
+    classDef audit fill:#f1f3f4,stroke:#5f6368,stroke-width:2px,color:#3c4043,stroke-dasharray: 4 3
+
+    class CLIUser client
+    class Schema,Pipeline,Solver1,Solver2,Solver3,OptReg,Render core
+    class Input,Registry,Result,Wheel storage
+    class Backend2,Backend3 optional
+    class Backend1 core
+    class Audit,ExitCode audit
+```
+
+Feasibility, performance, and macro are computed in that fixed order inside the pipeline box, matching section 1's requirement that a configuration failing feasibility never gets a misleadingly precise performance number. The two green dashed boxes are optional backends, present in the diagram because the registry can dispatch to them, drawn dashed because neither is required for the tool to function. The gray dashed boxes on the right are the two systems that read the registries without being part of the evaluation path itself, the standalone provenance audit and the WASM wheel build.
+
+## 4. Component inventory
 
 ```
                     mlsysim CLI (Typer)
@@ -47,7 +99,7 @@ One detail in the dependency floors is a direct signal of how tightly this packa
 
 The registries are built by a generic plugin mechanism (`Registry`, keyed by Python entry points, not a hardcoded list), and the actual `Hardware` and `Models` collections are constructed by a loader that reads per-item YAML files and builds typed registry subclasses from them dynamically. Solver backends implement one shared protocol (`compile()`/`solve()`) so the evaluation pipeline can call any of them identically regardless of which one actually ran.
 
-## 4. Data flow: `mlsysim eval`
+## 5. Data flow: `mlsysim eval`
 
 ```
 1. Input: either a positional target.yaml (cluster plan, has
@@ -81,7 +133,7 @@ The registries are built by a generic plugin mechanism (`Registry`, keyed by Pyt
 
 The three-level structure in stage 4 is the direct implementation of the ordering described in section 1: feasibility is checked first, and a configuration that fails feasibility does not get a meaningful performance or economics answer, it gets marked accordingly rather than the pipeline proceeding to compute numbers for a configuration that cannot physically run.
 
-## 5. Error handling
+## 6. Error handling
 
 ```
 ExitCode (IntEnum)
@@ -97,13 +149,13 @@ Registry integrity is enforced at load time, not at use time. Loading the hardwa
 
 The optional solver backends fail loudly and specifically rather than with a generic import error. If `scipy` or `ortools` is not installed and a command tries to use the corresponding backend, the failure message names the exact extra to install (`pip install mlsysim[opt]`), not a bare `ModuleNotFoundError` a user would have to decode themselves. The `exhaustive` backend has no external dependency and is loaded eagerly, since it is always available regardless of which optional extras are installed.
 
-## 6. The provenance system, and a naming collision worth knowing about
+## 7. The provenance system, and a naming collision worth knowing about
 
 Provenance is enforced in two separate places that are easy to conflate. The first is structural: every registry entry embeds a `Provenance`/`Sourced` value that is validated at construction time, a citation rule violation is a hard failure the moment the data is loaded, not something checked later. The second is a standalone audit tool, run as `python -m mlsysim.tools.audit_provenance --scope all --strict`, which walks the live, already-loaded registries and checks every node's provenance metadata against a set of per-domain rules.
 
 This audit tool is not wired into the `mlsysim` CLI in any way. It is a separate entry point, run directly as a module, typically from a release checklist or CI step, not from `mlsysim audit`. That CLI command with the same word in it does something unrelated: it profiles the actual machine running the CLI against the Iron Law model. Two different tools sharing the word "audit" is a real, existing naming collision in this codebase, not a documentation error, and it is worth remembering when someone says "run the audit" without specifying which one.
 
-## 7. How this package serves two very different runtimes
+## 8. How this package serves two very different runtimes
 
 ```
 Native install                    WASM (browser labs)
@@ -116,6 +168,6 @@ Native install                    WASM (browser labs)
 
 The `mlsysim.labs` subpackage is the one part of this codebase built specifically for the second runtime. It is the only subpackage that imports `marimo` or `pyodide`, and it is explicitly excluded from the project's type-checking configuration, since those imports do not resolve outside a Pyodide environment. The coupling between `labs/` and the rest of the package runs in one direction only: `labs/` imports the registries and the engine the same way any external consumer would, but nothing in the core physics engine, the registries, or the CLI imports anything from `labs/`. This means the labs UI layer is genuinely separable from the physics engine it sits on top of, even though both currently ship inside the same wheel rather than as two separate installable packages.
 
-## 8. Contributing
+## 9. Contributing
 
 If you are adding a new solver backend, implement the shared `OptimizerProtocol` and register it through the lazy-loading pattern the scipy and or-tools backends already use, do not import a heavy optional dependency eagerly at module load time. If you are changing registry data, remember that a duplicate key is a load-time failure, not a silent overwrite, and that a citation your entry relies on has to pass the structural provenance check before it will load at all, the standalone audit tool is a separate, additional check on top of that, not a replacement for it.

@@ -19,11 +19,58 @@ The app has to work with zero backend at all (a bundled summary of every questio
 | vault-cli | `typer` | The `vault` CLI framework itself. |
 | vault-cli | `pydantic>=2.7` | Validates every question YAML file against a schema before it can enter a build. |
 | vault-cli | `pyyaml` | Reads and writes the question YAML files. |
-| vault-cli | **not** `linkml` | Worth stating explicitly: the LinkML schema exists as documentation, but `linkml` is not an actual dependency of vault-cli, and nothing in the pipeline generates code from it yet. See section 6. |
+| vault-cli | **not** `linkml` | Worth stating explicitly: the LinkML schema exists as documentation, but `linkml` is not an actual dependency of vault-cli, and nothing in the pipeline generates code from it yet. See section 7. |
 | staffml-vault-worker | none at runtime | Raw Cloudflare Workers code against D1 (SQL) and KV (rate-limit counters), no npm runtime dependencies at all. |
 | AI interviewer worker | none at runtime | Same pattern, a single-file adapter over Cloudflare Workers AI, Groq, OpenAI, Anthropic, Gemini, and OpenRouter, plus a KV-backed rate limiter. |
 
-## 3. Component inventory
+## 3. Full system diagram
+
+```mermaid
+flowchart TD
+    Contributor(["✍️ Contributor"])
+    Student(["🎓 Student"])
+
+    YAML[("Question YAML<br/>vault/questions/*.yaml")]
+    VaultCLI["vault-cli<br/>loader.py -> compiler.py"]
+    DB[("vault.db / D1<br/>questions table")]
+    Worker["staffml-vault-worker<br/>/questions/:id  /search"]
+    JSON[("corpus.json /<br/>corpus-summary.json<br/>static fallback")]
+    Frontend["Frontend data layer<br/>corpus.ts + vault-fetch.ts"]
+    UI["Next.js UI<br/>practice / gauntlet"]
+    Progress[("localStorage<br/>SM-2 schedule")]
+
+    AIWorker["AI Interviewer Worker<br/>/ask  /interview"]
+    LLM[["Groq / OpenAI / Anthropic /<br/>Gemini / OpenRouter"]]
+    Analytics["Analytics Worker"]
+    Schema["LinkML schema<br/>documentation only,<br/>not code-generated"]
+
+    Contributor --> YAML --> VaultCLI --> DB
+    VaultCLI -.->|"--local-json"| JSON
+    DB --> Worker
+    Worker --> Frontend
+    JSON -.->|"VAULT_FALLBACK=static"| Frontend
+    Frontend --> UI --> Student
+    UI --> Progress
+    UI --> AIWorker --> LLM
+    UI --> Analytics
+    Schema -.->|hand-kept in sync,<br/>hash-checked only| VaultCLI
+
+    classDef client fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#1a3c6e
+    classDef core fill:#fef3e0,stroke:#f29900,stroke-width:2px,color:#7a4a00
+    classDef storage fill:#f3e8fd,stroke:#a142f4,stroke-width:2px,color:#4a1a7a
+    classDef external fill:#e6f4ea,stroke:#188038,stroke-width:2px,color:#0d4423
+    classDef doc fill:#f1f3f4,stroke:#5f6368,stroke-width:2px,color:#3c4043,stroke-dasharray: 4 3
+
+    class Contributor,Student client
+    class VaultCLI,Worker,Frontend,UI,AIWorker,Analytics core
+    class YAML,DB,JSON,Progress storage
+    class LLM external
+    class Schema doc
+```
+
+Orange boxes are code that runs, either on Cloudflare or in the browser. Purple cylinders are where data actually lives. Green is the external LLM layer, outside this codebase's control. The dashed gray box is the LinkML schema, present in the picture because it is documented as the source of truth, drawn with a dashed line specifically because it does not actually generate anything downstream of it yet, see section 7.
+
+## 4. Component inventory
 
 ```
         interviews/vault/questions/*.yaml
@@ -49,7 +96,7 @@ The app has to work with zero backend at all (a bundled summary of every questio
 
 Two more components sit alongside this main pipeline rather than inside it: the **AI interviewer worker**, a separate Cloudflare Worker with its own rate limiter and its own set of LLM provider adapters, and the **analytics worker**, the simplest of the three, storing batched event data in KV.
 
-## 4. Data flow
+## 5. Data flow
 
 ### From a contributor's YAML file to a rendered question
 
@@ -111,7 +158,7 @@ There is a second path that bypasses the Worker entirely: `vault build --local-j
 
 None of this touches the network. The spaced-repetition system is entirely local, by design, matching the product's stated no-account, no-server-side-persistence stance.
 
-## 5. Error handling
+## 6. Error handling
 
 The transport layer (`vault-fetch.ts`) is the most carefully built error-handling code in the frontend. Each request gets an 8-second per-attempt timeout, up to two retries with full-jitter exponential backoff, and retries are restricted to a specific set of retryable conditions, HTTP 408, 425, 429, 500, 502, 503, 504, or a network-level error, explicitly excluding a client-initiated abort. Layered on top of that is a per-origin circuit breaker: after five consecutive failures it opens for 30 seconds, and its half-open state correctly admits only one probe request at a time rather than letting every waiting caller through at once, a bug that existed in an earlier, since-replaced version of this transport code.
 
@@ -131,12 +178,12 @@ This asymmetry is intentional: losing the ability to rate-limit question browsin
 
 Content validation follows the same non-aborting philosophy as the retry logic: a bad question file produces a `LoadError` with its path and message, the build continues past it, and the build only fails outright if zero questions loaded at all. This means a single contributor's malformed YAML cannot block everyone else's build, at the cost of a bad file being able to silently sit unpublished until someone notices it in the error log.
 
-## 6. Where the system is not as connected as it looks
+## 7. Where the system is not as connected as it looks
 
 The LinkML schema at `interviews/vault/schema/question_schema.yaml` is described in the design documentation as the single source of truth, but as of this document, it is not the source anything is actually generated from. The vault-cli's own codegen command docstring states plainly that this is a deliberate Phase 1 stub: the three real artifacts a question's shape depends on, the Pydantic models, the D1 schema SQL, and the TypeScript types, are hand-maintained files, kept in sync only by a SHA-256 hash-drift check (`vault codegen --check`) run against a committed hash manifest. If a contributor edits one of these three files and forgets to update the hash, or edits the LinkML schema and forgets all three, the drift check is the only thing that would catch it, and it only catches drift, it cannot fix it or tell you which file is the one that changed incorrectly.
 
 The decision of whether the frontend talks to the Worker or to bundled static data is centralized in one place, `vault-config.ts`'s `getVaultMode()`, which returns `"static"` only when an environment variable is explicitly set that way, and `"worker"` otherwise. This replaced an earlier version of the code where this decision was made independently, and inconsistently, in two different files. Any new code that needs to know which mode is active should call this function rather than re-deriving the answer, that duplication is exactly what caused the earlier bug.
 
-## 7. Contributing
+## 8. Contributing
 
 If you are changing the question schema, know that editing the LinkML file alone does nothing, you have to separately update the Pydantic model, the D1 schema SQL, and the TypeScript type by hand, then update the codegen hash, or `vault codegen --check` will correctly flag your change as drift. If you are touching the Worker response shape, check `corpus.ts`'s re-nesting logic in the same change, since the flat-to-nested mapping is not automatically kept in sync with what the Worker actually returns.
