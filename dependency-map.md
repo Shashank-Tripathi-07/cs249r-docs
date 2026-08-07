@@ -1,6 +1,6 @@
 # Dependency Map
 
-*This document is sourced directly from GitHub's own dependency graph for `harvard-edge/cs249r_book` (the Insights tab's "Dependency graph" view, fetched via the repo's SBOM and GraphQL API), cross-checked against the real manifest files for the projects covered elsewhere in this docs set. It answers two different questions: how big is the full dependency surface (every resolved package, direct and transitive), and which specific packages does each sub-project actually declare and why. The first number is what security tooling cares about. The second is what a contributor changing a dependency needs.*
+*This document is sourced directly from GitHub's own dependency graph for `harvard-edge/cs249r_book` (the Insights tab's "Dependency graph" view, fetched via the repo's SBOM and GraphQL API), cross-checked against the real manifest files for the projects covered elsewhere in this docs set. It answers two different questions: how big is the full dependency surface (every resolved package, direct and transitive), and which specific packages does each sub-project actually declare and why. The first number is what security tooling cares about. The second is what a contributor changing a dependency needs. For the full alphabetical, ctrl+F-able reference covering every one of the 1,629 resolved packages, transitive included, see [`packages.md`](packages.md), this document stays curated and short on purpose, that one is the exhaustive companion.
 
 ## 1. The full picture, as GitHub sees it
 
