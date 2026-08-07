@@ -10,6 +10,7 @@ The core two-volume textbook, plus its custom build/validate/publish tooling (th
 
 - [`design.md`](book/design.md)
 - [`implementation.md`](book/implementation.md)
+- [`system_design.md`](book/system_design.md): the Binder CLI's command dispatch, its content-validation check suite, and the real build chain from a `.qmd` chapter to HTML/PDF/EPUB.
 - [`ci-workflows.md`](book/ci-workflows.md)
 
 ## [`staffml/`](staffml/)
@@ -52,6 +53,7 @@ Hands-on embedded ML labs for real devices (Arduino, Seeed, Raspberry Pi).
 
 - [`design.md`](kits/design.md)
 - [`implementation.md`](kits/implementation.md)
+- [`system_design.md`](kits/system_design.md): dependencies, content structure, and the build chain from a lab `.qmd` to a deployed site plus a downloadable PDF.
 - [`ci-workflows.md`](kits/ci-workflows.md)
 
 ## [`mlperf-edu/`](mlperf-edu/)
@@ -60,6 +62,7 @@ A locally executable, quality-gated benchmark specification adapted from MLPerf'
 
 - [`design.md`](mlperf-edu/design.md)
 - [`implementation.md`](mlperf-edu/implementation.md)
+- [`system_design.md`](mlperf-edu/system_design.md): the workload registry, the provenance-manifest anti-cheat system, and how the GraderPipeline class from PR #1933 was later deleted and replaced with in-process grading.
 - [`ci-workflows.md`](mlperf-edu/ci-workflows.md)
 
 ## [`socratiq/`](socratiq/)
@@ -68,6 +71,7 @@ An embeddable, AI-powered learning widget for static HTML pages.
 
 - [`design.md`](socratiq/design.md)
 - [`implementation.md`](socratiq/implementation.md)
+- [`system_design.md`](socratiq/system_design.md): the chat provider-fallback chain, the Shadow DOM and IndexedDB persistence, the XSS sanitization boundary, and the fully offline quiz fallback.
 - [`ci-workflows.md`](socratiq/ci-workflows.md)
 
 ## [`design-grammar/`](design-grammar/)
@@ -76,6 +80,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 
 - [`design.md`](design-grammar/design.md)
 - [`implementation.md`](design-grammar/implementation.md)
+- [`system_design.md`](design-grammar/system_design.md): `grammar.yml` as the single source of truth, and the verified sync mechanism that generates StaffML's `/framework` page from it.
 - [`ci-workflows.md`](design-grammar/ci-workflows.md)
 
 ## [`slides/`](slides/)
@@ -84,6 +89,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 
 - [`design.md`](slides/design.md)
 - [`implementation.md`](slides/implementation.md)
+- [`system_design.md`](slides/system_design.md): the shared Beamer theme, the SVG-to-PDF-to-PPTX build chain, and why the compile engine is `pdflatex`, not `xelatex`.
 - [`ci-workflows.md`](slides/ci-workflows.md)
 
 ## [`instructors/`](instructors/)
@@ -92,6 +98,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 
 - [`design.md`](instructors/design.md)
 - [`implementation.md`](instructors/implementation.md)
+- [`system_design.md`](instructors/system_design.md): a short, honest non-finding, this project has no custom code at all, pure Quarto content.
 - [`ci-workflows.md`](instructors/ci-workflows.md)
 
 ## [`site/`](site/)
@@ -100,6 +107,7 @@ The ecosystem's public front door: home, about, community, newsletter, and mini-
 
 - [`design.md`](site/design.md)
 - [`implementation.md`](site/implementation.md)
+- [`system_design.md`](site/system_design.md): the newsletter sync CLI, the two-stage stats pipeline, and the mini-games.
 - [`ci-workflows.md`](site/ci-workflows.md)
 
 ---
