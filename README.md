@@ -17,6 +17,7 @@ Interview-prep question bank and practice app.
 
 - [`design.md`](staffml/design.md)
 - [`implementation.md`](staffml/implementation.md)
+- [`system_design.md`](staffml/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the vault pipeline or the Workers backend.
 
 ## [`tinytorch/`](tinytorch/)
 
@@ -24,6 +25,7 @@ Hands-on course where students build an ML framework from scratch.
 
 - [`design.md`](tinytorch/design.md)
 - [`implementation.md`](tinytorch/implementation.md)
+- [`system_design.md`](tinytorch/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the export pipeline or the milestone system.
 
 ## [`mlsysim/`](mlsysim/)
 
@@ -31,6 +33,13 @@ First-principles analytical modeling framework for ML systems, also the physics 
 
 - [`design.md`](mlsysim/design.md)
 - [`implementation.md`](mlsysim/implementation.md)
+- [`system_design.md`](mlsysim/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the physics core or a solver backend.
+
+## [`labs/`](labs/)
+
+The 34 browser-based interactive labs (Volumes I and II), built on the mlsysim engine and exported to WASM via marimo.
+
+- [`system_design.md`](labs/system_design.md): dependencies, components, the export and boot sequence, and progress persistence, for a contributor adding a lab or debugging the WASM path. Labs share their product framing with [`mlsysim/design.md`](mlsysim/design.md), there is no separate `design.md` for this folder.
 
 ## [`kits/`](kits/)
 
