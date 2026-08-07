@@ -11,3 +11,7 @@
 | `tinytorch-update-pdfs.yml` | Rebuilds and redeploys just the PDFs, no site rebuild, no version bump, for when only PDF content changed. |
 
 See [`system_design.md`](system_design.md) for how `tito module complete` and the export pipeline relate to what CI actually checks, `tinytorch-validate-dev.yml`'s stages mirror the same test tiers a contributor runs locally via `tito dev test`.
+
+## A real, verified bug in this pipeline
+
+**2026-05-17 (`df88ff7a72`), shared with Labs: concurrency grouped only on `github.ref`.** A manual `workflow_dispatch`, or a `workflow_call` from `tinytorch-publish-live.yml`'s preflight step, landing on the same SHA as a push would cancel the push run via `cancel-in-progress`, showing red on a commit that was actually healthy. Fixed by switching to the `head_ref || run_id` pattern already used by kits, mlsysim, site, slides, and instructors. See the [top-level doc's Pattern A](../ci-workflows.md#pattern-a-concurrency-group-too-coarse-dispatch-collides-with-push) for the two other projects this exact bug independently hit, at different times.

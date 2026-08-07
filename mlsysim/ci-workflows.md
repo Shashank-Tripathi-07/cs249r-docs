@@ -9,3 +9,9 @@ Standard triad (`mlsysim-validate-dev.yml` runs pytest plus a docs-site build; `
 - **`mlsysim-build-pdfs.yml`**: the reusable workflow both of the above call to actually build the paper and slide PDFs.
 
 See [`system_design.md`](system_design.md) section 8 for how the native-install versus WASM-wheel split (also relevant to `mlsysim-pypi-publish.yml`'s build step) actually works.
+
+## Real, verified bugs in this pipeline
+
+**2026-05-27 (`c874a7c69b`): a genuine Python 3.11 interpreter bug, not a code bug.** CI ran on Python 3.11, which re-enters partially-initialized parent packages during relative imports, causing an unavoidable circular import with the `datasets` subpackage. Rather than restructuring the code around it, the fix bumped CI to Python 3.12, where PEP 690 handles the case correctly, and reverted `registry.py` back to clean relative imports. Worth knowing if `mlsysim`'s CI or local dev environment is ever pinned back below 3.12.
+
+**2026-05-26 (`782f763259`): `pre-commit`'s fallback dependency list silently diverged from the real one.** The `mlsysim-check-registry-gates` check failed in CI specifically because `pre-commit`'s fallback dependency set (used when normal environment resolution can't reach the network) was missing `pytest`. A reminder that any "fallback" dependency list is a second, easy-to-forget source of truth that can drift from the primary one without anyone noticing until CI fails on it.
