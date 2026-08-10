@@ -2,7 +2,7 @@
 
 Contributor-facing design and implementation documentation for sub-projects of [`harvard-edge/cs249r_book`](https://github.com/harvard-edge/cs249r_book) (the "Machine Learning Systems" course repository).
 
-New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to. Curious about the repo's actual history, who's shipped what, when activity spiked, which sub-project gets the most PR volume? [`pr-history.md`](pr-history.md) is a complete, data-derived record of all 1,187 merged PRs since 2023, contributor rankings, a monthly timeline, and a full chronological table of every one of them. Need a fast number, how many labs, how many TinyTorch modules, how many dependencies does StaffML actually have? [`stats.md`](stats.md) is a per-project cheat sheet of exactly that, dated so you know when it was last true. Keep [`glossary.md`](glossary.md) open alongside whatever you're reading; it defines every recurring technical term in plain language, from Quarto and Pyodide to the roofline model and CORS. If you're debugging a CI failure or a red badge, [`ci-workflows.md`](ci-workflows.md) inventories all 66 GitHub Actions workflows in the main repo, per-project and repo-wide, with real, dated CI incidents mined from git history documented at the end; each project's own `ci-workflows.md` (linked below) covers just that project's workflows. Staring at a red run right now and want the fast path instead of the full story? [`troubleshooting.md`](troubleshooting.md) is a symptom-first lookup table across every documented incident. If you're about to run, or trying to understand, an actual release, [`release-process.md`](release-process.md) covers how `dev` reaches the live site and PyPI: the publish-guard gate, `site_only` mode, and each sub-project's own release quirks (Book's DOI-downgrade protection, MLSys·im's OIDC PyPI publish, StaffML's D1-then-Worker deploy order). If you're reviewing a dependency bump, [`dependency-map.md`](dependency-map.md) covers the full 1,629-package dependency graph, what each project actually declares directly, and which dependencies are shared across projects in ways that aren't obvious from any single manifest file; [`packages.md`](packages.md) is its exhaustive companion, an alphabetical, ctrl+F-able table of all 1,629 packages (direct and transitive) with which project pulls in each one and through what, built specifically so a Dependabot PR for an unrecognized package name has a fast answer.
+New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to. Curious about the repo's actual history, who's shipped what, when activity spiked, which sub-project gets the most PR volume? [`pr-history.md`](pr-history.md) is a complete, data-derived record of all 1,187 merged PRs since 2023, contributor rankings, a monthly timeline, and a full chronological table of every one of them. Need a fast number, how many labs, how many TinyTorch modules, how many dependencies does StaffML actually have? [`stats.md`](stats.md) is a per-project cheat sheet of exactly that, dated so you know when it was last true. Keep [`glossary.md`](glossary.md) open alongside whatever you're reading; it defines every recurring technical term in plain language, from Quarto and Pyodide to the roofline model and CORS. If you're debugging a CI failure or a red badge, [`ci-workflows.md`](ci-workflows.md) inventories all 66 GitHub Actions workflows in the main repo, per-project and repo-wide, with real, dated CI incidents mined from git history documented at the end; each project's own `ci-workflows.md` (linked below) covers just that project's workflows. Staring at a red run right now and want the fast path instead of the full story? [`troubleshooting.md`](troubleshooting.md) is a symptom-first lookup table across every documented incident. If you're about to run, or trying to understand, an actual release, [`release-process.md`](release-process.md) covers how `dev` reaches the live site and PyPI: the publish-guard gate, `site_only` mode, and each sub-project's own release quirks (Book's DOI-downgrade protection, MLSys·im's OIDC PyPI publish, StaffML's D1-then-Worker deploy order). If you're reviewing a dependency bump, [`dependency-map.md`](dependency-map.md) covers the full 1,629-package dependency graph, what each project actually declares directly, and which dependencies are shared across projects in ways that aren't obvious from any single manifest file; [`packages.md`](packages.md) is its exhaustive companion, an alphabetical, ctrl+F-able table of all 1,629 packages (direct and transitive) with which project pulls in each one and through what, built specifically so a Dependabot PR for an unrecognized package name has a fast answer. Wondering what formatter or linter applies before you write a line of code? [`coding-style.md`](coding-style.md) is the honest answer: there is no single repo-wide style, three different Python setups and one real TypeScript lint config out of five TS/JS projects, each project's own `coding-style.md` (linked below) covers its specific setup.
 
 ## [`book/`](book/)
 
@@ -12,6 +12,7 @@ The core two-volume textbook, plus its custom build/validate/publish tooling (th
 - [`implementation.md`](book/implementation.md)
 - [`system_design.md`](book/system_design.md): the Binder CLI's command dispatch, its content-validation check suite, and the real build chain from a `.qmd` chapter to HTML/PDF/EPUB.
 - [`ci-workflows.md`](book/ci-workflows.md)
+- [`coding-style.md`](book/coding-style.md)
 
 ## [`staffml/`](staffml/)
 
@@ -21,6 +22,7 @@ Interview-prep question bank and practice app.
 - [`implementation.md`](staffml/implementation.md)
 - [`system_design.md`](staffml/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the vault pipeline or the Workers backend.
 - [`ci-workflows.md`](staffml/ci-workflows.md)
+- [`coding-style.md`](staffml/coding-style.md)
 
 ## [`tinytorch/`](tinytorch/)
 
@@ -30,6 +32,7 @@ Hands-on course where students build an ML framework from scratch.
 - [`implementation.md`](tinytorch/implementation.md)
 - [`system_design.md`](tinytorch/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the export pipeline or the milestone system.
 - [`ci-workflows.md`](tinytorch/ci-workflows.md)
+- [`coding-style.md`](tinytorch/coding-style.md)
 
 ## [`mlsysim/`](mlsysim/)
 
@@ -39,6 +42,7 @@ First-principles analytical modeling framework for ML systems, also the physics 
 - [`implementation.md`](mlsysim/implementation.md)
 - [`system_design.md`](mlsysim/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the physics core or a solver backend.
 - [`ci-workflows.md`](mlsysim/ci-workflows.md)
+- [`coding-style.md`](mlsysim/coding-style.md)
 
 ## [`labs/`](labs/)
 
@@ -46,6 +50,7 @@ The 34 browser-based interactive labs (Volumes I and II), built on the mlsysim e
 
 - [`system_design.md`](labs/system_design.md): dependencies, components, the export and boot sequence, and progress persistence, for a contributor adding a lab or debugging the WASM path. Labs share their product framing with [`mlsysim/design.md`](mlsysim/design.md), there is no separate `design.md` for this folder.
 - [`ci-workflows.md`](labs/ci-workflows.md)
+- [`coding-style.md`](labs/coding-style.md)
 
 ## [`kits/`](kits/)
 
@@ -55,6 +60,7 @@ Hands-on embedded ML labs for real devices (Arduino, Seeed, Raspberry Pi).
 - [`implementation.md`](kits/implementation.md)
 - [`system_design.md`](kits/system_design.md): dependencies, content structure, and the build chain from a lab `.qmd` to a deployed site plus a downloadable PDF.
 - [`ci-workflows.md`](kits/ci-workflows.md)
+- [`coding-style.md`](kits/coding-style.md)
 
 ## [`mlperf-edu/`](mlperf-edu/)
 
@@ -64,6 +70,7 @@ A locally executable, quality-gated benchmark specification adapted from MLPerf'
 - [`implementation.md`](mlperf-edu/implementation.md)
 - [`system_design.md`](mlperf-edu/system_design.md): the workload registry, the provenance-manifest anti-cheat system, and how the GraderPipeline class from PR #1933 was later deleted and replaced with in-process grading.
 - [`ci-workflows.md`](mlperf-edu/ci-workflows.md)
+- [`coding-style.md`](mlperf-edu/coding-style.md)
 
 ## [`socratiq/`](socratiq/)
 
@@ -73,6 +80,7 @@ An embeddable, AI-powered learning widget for static HTML pages.
 - [`implementation.md`](socratiq/implementation.md)
 - [`system_design.md`](socratiq/system_design.md): the chat provider-fallback chain, the Shadow DOM and IndexedDB persistence, the XSS sanitization boundary, and the fully offline quiz fallback.
 - [`ci-workflows.md`](socratiq/ci-workflows.md)
+- [`coding-style.md`](socratiq/coding-style.md)
 
 ## [`design-grammar/`](design-grammar/)
 
@@ -82,6 +90,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 - [`implementation.md`](design-grammar/implementation.md)
 - [`system_design.md`](design-grammar/system_design.md): `grammar.yml` as the single source of truth, and the verified sync mechanism that generates StaffML's `/framework` page from it.
 - [`ci-workflows.md`](design-grammar/ci-workflows.md)
+- [`coding-style.md`](design-grammar/coding-style.md)
 
 ## [`slides/`](slides/)
 
@@ -91,6 +100,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 - [`implementation.md`](slides/implementation.md)
 - [`system_design.md`](slides/system_design.md): the shared Beamer theme, the SVG-to-PDF-to-PPTX build chain, and why the compile engine is `pdflatex`, not `xelatex`.
 - [`ci-workflows.md`](slides/ci-workflows.md)
+- [`coding-style.md`](slides/coding-style.md)
 
 ## [`instructors/`](instructors/)
 
@@ -100,6 +110,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 - [`implementation.md`](instructors/implementation.md)
 - [`system_design.md`](instructors/system_design.md): a short, honest non-finding, this project has no custom code at all, pure Quarto content.
 - [`ci-workflows.md`](instructors/ci-workflows.md)
+- [`coding-style.md`](instructors/coding-style.md)
 
 ## [`site/`](site/)
 
@@ -109,6 +120,7 @@ The ecosystem's public front door: home, about, community, newsletter, and mini-
 - [`implementation.md`](site/implementation.md)
 - [`system_design.md`](site/system_design.md): the newsletter sync CLI, the two-stage stats pipeline, and the mini-games.
 - [`ci-workflows.md`](site/ci-workflows.md)
+- [`coding-style.md`](site/coding-style.md)
 
 ---
 
