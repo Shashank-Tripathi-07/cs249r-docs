@@ -60,6 +60,8 @@ The validation suite lives in `ValidateCommand` (`cli/commands/validate.py`), an
    PDF  -> verify_volume_pdf() runs a post-build cross-reference scan
 ```
 
+Step 3's Quarto render pulls in a chain of Pandoc Lua filters registered in `book/quarto/config/shared/pdf/filters.yml`, not enumerated above since Binder itself never calls them directly, Quarto does. PR #2002 (2026-08-10, Volume I's second publisher draft) added one: `book/quarto/filters/fallacy-pitfall.lua`, which handles the PDF-specific spacing and paragraph-indentation rules the publisher requires around Fallacy/Pitfall callout blocks. Worth knowing this filter chain exists and grows over time if a PDF render starts looking wrong in a way HTML doesn't, the bug may be in a filter here rather than in the source `.qmd`.
+
 ## 5. Error handling
 
 Every validation check in the suite returns the same two dataclasses, defined once, not per-check:
