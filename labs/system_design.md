@@ -172,15 +172,22 @@ ledger.json        +-- stash on globalThis._mlsys_temp_state
 
 The JS bridge variable is named `_mlsys_temp_state`, a single leading underscore rather than a double one, and that spelling is deliberate, not cosmetic. Python silently mangles any double-underscore-prefixed name written inside a class body, which previously desynced the Python-side write from the plain name the embedded JS string expected to read, and the fix (and the comment explaining it) lives directly in `save_async()`.
 
-The WASM save is fire-and-forget by design (a lab's UI cannot block on a full IndexedDB round trip without stalling the interaction), so failure detection is handled separately: `save()` tracks the pending task, and a done-callback captures whatever exception, if any, comes back once the background write finishes.
+The WASM save is fire-and-forget by design (a lab's UI cannot block on a full IndexedDB round trip without stalling the interaction), so failure detection is handled separately, and this is where a real data-loss bug lived until PR #1988 (2026-08-10): the background task was a bare `asyncio.create_task(...)` with no callback attached, so an IndexedDB failure (quota exceeded, private-browsing storage denial, anything) vanished into an unobserved task. A student could lose progress across any of the 34 labs with zero indication anything went wrong.
+
+The fix attaches a done-callback to the background task and exposes two new properties: `last_save_error` (set to the exception string on failure, cleared to `None` on the next successful save) and `save_pending` (`True` while the background write is in flight). `save()` itself is unchanged in signature and still returns immediately without blocking. Two new methods exist for callers that need a stronger guarantee than fire-and-forget:
+
+- **`asave(...)`**, an async variant of `save()` for callers that can `await`, it performs the same write but propagates the exception directly to the caller instead of only recording it on `last_save_error`.
+- **`flush()`**, awaits whatever background save is currently in flight (if any) and re-raises its exception if it failed, for a caller that needs to confirm a prior fire-and-forget `save()` actually landed before proceeding.
+
+`save_async()`'s own failure mode changed too: it now raises on an IndexedDB failure instead of swallowing it into a bare `print()`. Four regression tests landed in `mlsysim/tests/test_state.py` alongside the fix, covering the native roundtrip, a successful WASM save clearing `last_save_error`, a failing WASM save being captured on `last_save_error` rather than silently dropped, and `asave()` propagating its exception directly.
 
 Native persistence is the simpler of the two paths on purpose: a JSON file at `~/.mlsys/ledger.json`, written and read with the standard library, no browser storage API involved, since a native session has no browser to talk to.
 
 ## 8. Error handling
 
-Both the native and WASM load paths fail the same way on purpose: on any exception, `LedgerState` resets to a fresh, empty default rather than raising. This is the correct behavior for "no prior save exists" and the wrong behavior for "a save exists but could not be read", and the two cases currently cannot be told apart from the caller's side, which is tracked as a known, separate gap in the read path (see `../mlsysim/design.md`'s known issues section, not duplicated here).
+Both the native and WASM load paths fail the same way on purpose: on any exception, `LedgerState` resets to a fresh, empty default rather than raising. This is the correct behavior for "no prior save exists" and the wrong behavior for "a save exists but could not be read", and the two cases currently cannot be told apart from the caller's side, tracked as [issue #1994](https://github.com/harvard-edge/cs249r_book/issues/1994), still open as of 2026-08-10, and a direct sibling of the write-side bug PR #1988 fixed below: same silent-failure shape, opposite end of the read/write path.
 
-On the write side, `save_async()`'s background task failure is captured explicitly rather than silently dropped: the done-callback records the error and logs it through the browser console, falling back to a plain `stderr` print if the console itself is unreachable. This replaced an earlier version of the code where a save failure could vanish entirely, with the caller believing the write had succeeded.
+On the write side, `save_async()`'s background task failure is captured explicitly rather than silently dropped: the done-callback records the error on `last_save_error` and logs it through the browser console, falling back to a plain `stderr` print if the console itself is unreachable. This replaced an earlier version of the code where a save failure could vanish entirely, with the caller believing the write had succeeded, see the expanded writeup in section 7.
 
 `browser_smoke.py` treats any unexpected browser console error, any failed page load within its timeouts, or any missing expected UI element as a hard failure of that lab, there is no partial-credit or warning-only outcome at this tier.
 

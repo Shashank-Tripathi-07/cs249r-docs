@@ -94,7 +94,7 @@ Orange boxes are code that runs, either on Cloudflare or in the browser. Purple 
          SM-2 spaced repetition)
 ```
 
-Two more components sit alongside this main pipeline rather than inside it: the **AI interviewer worker**, a separate Cloudflare Worker with its own rate limiter and its own set of LLM provider adapters, and the **analytics worker**, the simplest of the three, storing batched event data in KV.
+Two more components sit alongside this main pipeline rather than inside it: the **AI interviewer worker**, a separate Cloudflare Worker with its own rate limiter and its own set of LLM provider adapters, and the **analytics worker**, the simplest of the three, storing batched event data in KV. As of PR #1945 (2026-08-10) there is a third: a **service worker app-shell layer**, covered in section 8a, that makes the whole frontend installable and partially usable offline.
 
 ## 5. Data flow
 
@@ -184,6 +184,22 @@ The LinkML schema at `interviews/vault/schema/question_schema.yaml` is described
 
 The decision of whether the frontend talks to the Worker or to bundled static data is centralized in one place, `vault-config.ts`'s `getVaultMode()`, which returns `"static"` only when an environment variable is explicitly set that way, and `"worker"` otherwise. This replaced an earlier version of the code where this decision was made independently, and inconsistently, in two different files. Any new code that needs to know which mode is active should call this function rather than re-deriving the answer, that duplication is exactly what caused the earlier bug.
 
-## 8. Contributing
+## 8. The service worker and offline/PWA layer
+
+StaffML became an installable Progressive Web App in PR #1945 (2026-08-10), a natural fit given the app already runs 100% client-side. No new npm dependency was added for this, `manifest.ts` and the service worker are hand-written, matching the project's existing preference for zero-dependency infrastructure code (see the "no HTTP client library" line in section 2).
+
+**`src/app/manifest.ts`** is a Next.js manifest route, built `force-static` so it still works with `output: export`. `start_url`, `scope`, `id`, and every icon URL carry `NEXT_PUBLIC_BASE_PATH` explicitly, the same convention `layout.tsx` already used for its og-image URLs, so the manifest resolves correctly regardless of what path prefix the site is deployed under.
+
+**`public/sw.js`** is the more consequential piece, because StaffML already had a service worker (the vault-API response cache, see section 6's rate-limiting discussion for the Worker side of that relationship). PR #1945 appends a second, clearly-delimited app-shell section below the existing vault section rather than replacing or merging into it, and the two are kept structurally incapable of interfering with each other:
+
+- The **vault handler** exits early unless the request URL starts with the vault API's own origin (cross-origin from the app shell's perspective).
+- The **app-shell handler** exits early unless the request is same-origin *and* inside the service worker's registration scope, so the surrounding Quarto book's own assets, served from the same domain, are never touched by StaffML's cache.
+- Cache key prefixes are disjoint by construction: `staffml-app-` for the shell, `staffml-vault-` for the existing vault cache, so each section's pruning logic (release-keyed for vault, version-keyed for the app shell) can never evict the other's entries.
+
+Caching strategy differs by request type: **navigations use network-first** (a new deploy is visible immediately; the cache only serves a revisit made while offline, falling back to an inline branded offline page as a last resort), while **script/style/image/font requests use stale-while-revalidate** with a 300-entry cap (`_next/static/*` assets are content-hashed, so staleness there is a structural non-issue). Everything else, corpus JSON, any XHR/fetch data, passes through untouched, data freshness for that layer stays owned by the existing vault section and `VersionDriftToast`, not duplicated into the new cache.
+
+`corpus-provider.tsx` registers the service worker unconditionally as part of this change, previously registration may have been more conditional; check that file directly if you need the exact current trigger.
+
+## 9. Contributing
 
 If you are changing the question schema, know that editing the LinkML file alone does nothing, you have to separately update the Pydantic model, the D1 schema SQL, and the TypeScript type by hand, then update the codegen hash, or `vault codegen --check` will correctly flag your change as drift. If you are touching the Worker response shape, check `corpus.ts`'s re-nesting logic in the same change, since the flat-to-nested mapping is not automatically kept in sync with what the Worker actually returns.
