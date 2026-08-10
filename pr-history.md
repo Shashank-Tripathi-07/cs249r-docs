@@ -49,7 +49,7 @@ A few things worth reading correctly here rather than at face value:
 - **`profvjreddi`'s 327** includes both PRs he authored and reviewed like anyone else, and merge commits/direct pushes GitHub attributes to him as the PR author when he lands a branch himself (several "Merge X into dev" and "chore(paper): regenerate..." entries in the largest-PRs table below are this pattern, not hand-authored diffs).
 - **`hzeljko`'s 225** is almost entirely book content, TikZ figure updates and chapter-PDF layout passes, a real, sustained content-production role distinct from the code-fix contributors below it.
 - **`dependabot`'s 195** is automated version bumps, not a human contributor, included here because the ranking is drawn from raw merge data, not because it's comparable to the humans around it.
-- **`Shashank-Tripathi-07` at #4 with 86** is the highest-ranked contributor who is neither the maintainer, a dedicated book-content contributor, nor a bot, the top human bug-fix/code contributor in the repo's history by this metric.
+- **`Shashank-Tripathi-07` at #4 with 86** is the highest-ranked contributor who is neither a dedicated book-content contributor, nor a bot, the top human bug-fix/code contributor in the repo's history by this metric.
 
 ## 3. Monthly timeline
 
