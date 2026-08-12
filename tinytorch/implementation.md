@@ -1,6 +1,6 @@
 # TinyTorch: Implementation Reference
 
-> **Status: as-built, contributor-facing.** TinyTorch is a live, already-implemented course and framework. This document is your map for reading and modifying the real source: file paths, line numbers, and representative code pulled directly from the codebase at `dev` HEAD (`8fb87d81`, 2026-08-04). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how." Section 11, "Common contribution workflows," is the fastest way in if you already know what you want to change.
+> **Status: as-built, contributor-facing.** TinyTorch is a live, already-implemented course and framework. This document is your map for reading and modifying the real source: file paths, line numbers, and representative code pulled directly from the codebase at `dev` HEAD (`7d695104`, 2026-08-12). Read the [design doc](design.md) first for the "what and why"; this doc is the "where and how." Section 11, "Common contribution workflows," is the fastest way in if you already know what you want to change.
 
 ## Prerequisites
 
@@ -282,6 +282,9 @@ For instructor-side grading workflows specifically, `INSTRUCTOR.md` documents th
 - `tinytorch/scripts/build-docs.sh` references a defunct Jupyter Book pipeline (`docs/_build/html`, `website/docs/`) that predates the current Quarto site, and is not called from any current CI workflow.
 - `tests/integration/test_module_integration.py` is fully disabled (`pytest.mark.skip`) with a comment that it targets stale package paths.
 - `settings.ini` and `pyproject.toml` specify different dependency version floors for the same package; nothing currently enforces they stay consistent beyond the manual version-bump step in the publish workflow.
+- `CHANGELOG.md`'s newest entry is `[0.1.10]` (dated 2026-04, marked "planned"); `pyproject.toml`'s actual `version` is `0.1.13` as of this document, at least three releases with no changelog entry.
+- `INSTRUCTOR.md` documents `tito module status --student student_id` and `--export class_progress.csv`; the real `status` subparser takes no arguments and both would fail with an argparse error.
+- `quarto/tito/troubleshooting.qmd` references a `tinytorch.nn` submodule (`from tinytorch.nn import Linear`) that doesn't exist; the real path is `tinytorch.core.layers`. The same file's `overview.qmd` sibling omits `tito package`, `tito olympics`, and `tito module path` from its command reference table, despite all three being real, registered commands.
 
 ---
 
