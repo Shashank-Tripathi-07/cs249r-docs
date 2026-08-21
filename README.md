@@ -2,9 +2,31 @@
 
 Contributor-facing design and implementation documentation for sub-projects of [`harvard-edge/cs249r_book`](https://github.com/harvard-edge/cs249r_book) (the "Machine Learning Systems" course repository).
 
-New here? Start with [`ecosystem-map.md`](ecosystem-map.md) for how all eleven projects below actually connect to each other (shared infrastructure, deployment order, real dependencies versus apparent ones), then drill into whichever project you're contributing to. Curious about the repo's actual history, who's shipped what, when activity spiked, which sub-project gets the most PR volume? [`pr-history.md`](pr-history.md) is a complete, data-derived record of all 1,187 merged PRs since 2023, contributor rankings, a monthly timeline, and a full chronological table of every one of them. Need a fast number, how many labs, how many TinyTorch modules, how many dependencies does StaffML actually have? [`stats.md`](stats.md) is a per-project cheat sheet of exactly that, dated so you know when it was last true. Keep [`glossary.md`](glossary.md) open alongside whatever you're reading; it defines every recurring technical term in plain language, from Quarto and Pyodide to the roofline model and CORS. If you're debugging a CI failure or a red badge, [`ci-workflows.md`](ci-workflows.md) inventories all 66 GitHub Actions workflows in the main repo, per-project and repo-wide, with real, dated CI incidents mined from git history documented at the end; each project's own `ci-workflows.md` (linked below) covers just that project's workflows. Staring at a red run right now and want the fast path instead of the full story? [`troubleshooting.md`](troubleshooting.md) is a symptom-first lookup table across every documented incident. If you're about to run, or trying to understand, an actual release, [`release-process.md`](release-process.md) covers how `dev` reaches the live site and PyPI: the publish-guard gate, `site_only` mode, and each sub-project's own release quirks (Book's DOI-downgrade protection, MLSys·im's OIDC PyPI publish, StaffML's D1-then-Worker deploy order). If you're reviewing a dependency bump, [`dependency-map.md`](dependency-map.md) covers the full 1,629-package dependency graph, what each project actually declares directly, and which dependencies are shared across projects in ways that aren't obvious from any single manifest file; [`packages.md`](packages.md) is its exhaustive companion, an alphabetical, ctrl+F-able table of all 1,629 packages (direct and transitive) with which project pulls in each one and through what, built specifically so a Dependabot PR for an unrecognized package name has a fast answer. Wondering what formatter or linter applies before you write a line of code? [`coding-style.md`](coding-style.md) is the honest answer: there is no single repo-wide style, three different Python setups and one real TypeScript lint config out of five TS/JS projects, each project's own `coding-style.md` (linked below) covers its specific setup. Before you propose something new, or want to know if a question is already settled, check [`design_decisions.md`](design_decisions.md): a sourced record of what Prof. Vijay Janapa Reddi has actually decided, rejected, or ruled out across the whole repo, real GitHub comments with dates and links, not inference from code. Four projects (book, StaffML, TinyTorch, labs) have a shorter, project-scoped `perspective.md` pulling just their relevant subset, linked below.
+## Start here
 
-## [`book/`](book/)
+New to the repo? Read [`ecosystem-map.md`](ecosystem-map.md) first, then jump to whichever project below you're contributing to.
+
+| Doc | What it's for |
+|---|---|
+| [`ecosystem-map.md`](ecosystem-map.md) | How all eleven projects actually connect: shared infrastructure, deployment order, real dependencies versus apparent ones. |
+| [`design_decisions.md`](design_decisions.md) | What Prof. Vijay Janapa Reddi has actually decided, rejected, or ruled out, sourced from real GitHub comments with dates and links, not inferred from code. Four projects (book, StaffML, TinyTorch, labs) also have their own shorter `perspective.md`, linked in their sections below. |
+| [`pr-history.md`](pr-history.md) | A complete, data-derived record of every merged PR since 2023 (1208 and counting): contributor rankings, a monthly timeline, and the full chronological table. |
+| [`stats.md`](stats.md) | A per-project cheat sheet of counts, how many labs, how many TinyTorch modules, how many dependencies StaffML actually has, dated so you know when it was last true. |
+| [`glossary.md`](glossary.md) | Plain-language definitions for every recurring technical term, from Quarto and Pyodide to the roofline model and CORS. Keep it open in a tab. |
+| [`ci-workflows.md`](ci-workflows.md) | All 66 GitHub Actions workflows, repo-wide and per-project, with real dated CI incidents mined from git history. Each project's own `ci-workflows.md` (linked below) covers just that project. |
+| [`troubleshooting.md`](troubleshooting.md) | A symptom-first lookup table across every documented incident, for when you're staring at a red run right now. |
+| [`release-process.md`](release-process.md) | How `dev` reaches the live site and PyPI: the publish-guard gate, `site_only` mode, and each project's own release quirks. |
+| [`dependency-map.md`](dependency-map.md) | The full 1,629-package dependency graph: what each project actually declares directly, and what's shared across projects in non-obvious ways. |
+| [`packages.md`](packages.md) | `dependency-map.md`'s exhaustive companion, an alphabetical, ctrl+F-able table of all 1,629 packages, direct and transitive, with which project pulls in each one and through what. |
+| [`coding-style.md`](coding-style.md) | The honest answer to "what linter applies here": there's no single repo-wide style, three Python setups and one real TypeScript config. Each project's own `coding-style.md` covers its specific setup. |
+
+## Projects
+
+[`book/`](#book) · [`staffml/`](#staffml) · [`tinytorch/`](#tinytorch) · [`mlsysim/`](#mlsysim) · [`labs/`](#labs) · [`kits/`](#kits) · [`mlperf-edu/`](#mlperf-edu) · [`socratiq/`](#socratiq) · [`design-grammar/`](#design-grammar) · [`slides/`](#slides) · [`instructors/`](#instructors) · [`site/`](#site)
+
+Every project has the same core doc set (`design.md`, `implementation.md`, `system_design.md`, `ci-workflows.md`, `coding-style.md`); a project only lists the ones it actually has, and only adds a one-line note when the doc covers something non-obvious.
+
+### `book/`
 
 The core two-volume textbook, plus its custom build/validate/publish tooling (the "Binder" CLI).
 
@@ -13,9 +35,9 @@ The core two-volume textbook, plus its custom build/validate/publish tooling (th
 - [`system_design.md`](book/system_design.md): the Binder CLI's command dispatch, its content-validation check suite, and the real build chain from a `.qmd` chapter to HTML/PDF/EPUB.
 - [`ci-workflows.md`](book/ci-workflows.md)
 - [`coding-style.md`](book/coding-style.md)
-- [`perspective.md`](book/perspective.md): what Prof. Vijay has explicitly decided or ruled out for the book, sourced from real GitHub comments, the two-volume scope narrowing, quiz-objective coupling, caption format, and build infrastructure calls.
+- [`perspective.md`](book/perspective.md): what Prof. Vijay has explicitly decided or ruled out for the book, the two-volume scope narrowing, quiz-objective coupling, caption format, and build infrastructure calls.
 
-## [`staffml/`](staffml/)
+### `staffml/`
 
 Interview-prep question bank and practice app.
 
@@ -25,9 +47,9 @@ Interview-prep question bank and practice app.
 - [`ci-workflows.md`](staffml/ci-workflows.md)
 - [`coding-style.md`](staffml/coding-style.md)
 - [`perspective.md`](staffml/perspective.md): the discuss-before-you-PR expectation for new features, stated directly by a collaborator and reinforced by Vijay's own review pattern.
-- Whitepaper: [`interviews/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/interviews/paper/paper.tex), "StaffML: A Physics-Grounded Interview Question Bank for Machine Learning Systems Engineers." Makes the case for testing "mechanical sympathy" (quantitative hardware reasoning) rather than algorithmic coding puzzles, and describes the question bank's four-axis classification (topic, cognitive zone, hardware track, level) and its validated LinkML/Pydantic schema. Compiled to PDF separately from the Quarto-built textbook, in CI.
+- Whitepaper: [`interviews/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/interviews/paper/paper.tex), "StaffML: A Physics-Grounded Interview Question Bank for Machine Learning Systems Engineers." Makes the case for testing "mechanical sympathy" (quantitative hardware reasoning) over algorithmic coding puzzles; describes the question bank's four-axis classification and its validated LinkML/Pydantic schema. Compiled to PDF in CI, separately from the Quarto-built textbook.
 
-## [`tinytorch/`](tinytorch/)
+### `tinytorch/`
 
 Hands-on course where students build an ML framework from scratch.
 
@@ -36,10 +58,10 @@ Hands-on course where students build an ML framework from scratch.
 - [`system_design.md`](tinytorch/system_design.md): dependencies, components, data flow, and error handling, for a contributor changing the export pipeline or the milestone system.
 - [`ci-workflows.md`](tinytorch/ci-workflows.md)
 - [`coding-style.md`](tinytorch/coding-style.md)
-- [`perspective.md`](tinytorch/perspective.md): why solutions are still visible in module source, the "durable foundation" bar for new core-module algorithms, the confirmed `src/` source-of-truth and `dev`-branch-target rules.
-- Whitepaper: [`tinytorch/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/tinytorch/paper/paper.tex), "TinyTorch: Building Machine Learning Systems from First Principles," by Vijay Janapa Reddi. Argues ML education has an "algorithm-systems divide" (students learn gradient descent without measuring memory, attention without reasoning about $O(N^2)$ scaling) and presents the 20-module build-your-own-framework curriculum as the fix, runnable on 4GB RAM with no GPU. Compiled to PDF separately from the Quarto-built textbook, in CI.
+- [`perspective.md`](tinytorch/perspective.md): why solutions are still visible in module source, the "durable foundation" bar for new core-module algorithms, and the confirmed `src/` source-of-truth and `dev`-branch-target rules.
+- Whitepaper: [`tinytorch/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/tinytorch/paper/paper.tex), "TinyTorch: Building Machine Learning Systems from First Principles," by Vijay Janapa Reddi. Argues ML education has an "algorithm-systems divide" and presents the 20-module build-your-own-framework curriculum as the fix, runnable on 4GB RAM with no GPU. Compiled to PDF in CI, separately from the Quarto-built textbook.
 
-## [`mlsysim/`](mlsysim/)
+### `mlsysim/`
 
 First-principles analytical modeling framework for ML systems, also the physics engine behind the browser-based interactive labs.
 
@@ -49,16 +71,16 @@ First-principles analytical modeling framework for ML systems, also the physics 
 - [`ci-workflows.md`](mlsysim/ci-workflows.md)
 - [`coding-style.md`](mlsysim/coding-style.md)
 
-## [`labs/`](labs/)
+### `labs/`
 
 The 34 browser-based interactive labs (Volumes I and II), built on the mlsysim engine and exported to WASM via marimo.
 
-- [`system_design.md`](labs/system_design.md): dependencies, components, the export and boot sequence, and progress persistence, for a contributor adding a lab or debugging the WASM path. Labs share their product framing with [`mlsysim/design.md`](mlsysim/design.md), there is no separate `design.md` for this folder.
+- [`system_design.md`](labs/system_design.md): dependencies, components, the export and boot sequence, and progress persistence, for a contributor adding a lab or debugging the WASM path. Labs share their product framing with [`mlsysim/design.md`](mlsysim/design.md); there is no separate `design.md` for this folder.
 - [`ci-workflows.md`](labs/ci-workflows.md)
 - [`coding-style.md`](labs/coding-style.md)
 - [`perspective.md`](labs/perspective.md): the corrected scope of the marimo widget-cascade bug and the PR that fixed it the wrong way first, plus how new hardware/board proposals get evaluated.
 
-## [`kits/`](kits/)
+### `kits/`
 
 Hands-on embedded ML labs for real devices (Arduino, Seeed, Raspberry Pi).
 
@@ -68,7 +90,7 @@ Hands-on embedded ML labs for real devices (Arduino, Seeed, Raspberry Pi).
 - [`ci-workflows.md`](kits/ci-workflows.md)
 - [`coding-style.md`](kits/coding-style.md)
 
-## [`mlperf-edu/`](mlperf-edu/)
+### `mlperf-edu/`
 
 A locally executable, quality-gated benchmark specification adapted from MLPerf's own discipline for classroom use.
 
@@ -78,7 +100,7 @@ A locally executable, quality-gated benchmark specification adapted from MLPerf'
 - [`ci-workflows.md`](mlperf-edu/ci-workflows.md)
 - [`coding-style.md`](mlperf-edu/coding-style.md)
 
-## [`socratiq/`](socratiq/)
+### `socratiq/`
 
 An embeddable, AI-powered learning widget for static HTML pages.
 
@@ -88,7 +110,7 @@ An embeddable, AI-powered learning widget for static HTML pages.
 - [`ci-workflows.md`](socratiq/ci-workflows.md)
 - [`coding-style.md`](socratiq/coding-style.md)
 
-## [`design-grammar/`](design-grammar/)
+### `design-grammar/`
 
 A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques from first principles.
 
@@ -98,7 +120,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 - [`ci-workflows.md`](design-grammar/ci-workflows.md)
 - [`coding-style.md`](design-grammar/coding-style.md)
 
-## [`slides/`](slides/)
+### `slides/`
 
 35 Beamer decks (Volumes I and II) plus packaged TinyML courseware.
 
@@ -108,7 +130,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 - [`ci-workflows.md`](slides/ci-workflows.md)
 - [`coding-style.md`](slides/coding-style.md)
 
-## [`instructors/`](instructors/)
+### `instructors/`
 
 "The Blueprint": syllabi, pedagogy, assessment, and TA guidance for adopting instructors.
 
@@ -118,7 +140,7 @@ A formal vocabulary and rewrite-rule catalog for deriving ML systems techniques 
 - [`ci-workflows.md`](instructors/ci-workflows.md)
 - [`coding-style.md`](instructors/coding-style.md)
 
-## [`site/`](site/)
+### `site/`
 
 The ecosystem's public front door: home, about, community, newsletter, and mini-games.
 
