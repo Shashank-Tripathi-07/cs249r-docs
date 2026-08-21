@@ -59,6 +59,8 @@ Hands-on course where students build an ML framework from scratch.
 - [`ci-workflows.md`](tinytorch/ci-workflows.md)
 - [`coding-style.md`](tinytorch/coding-style.md)
 - [`perspective.md`](tinytorch/perspective.md): why solutions are still visible in module source, the "durable foundation" bar for new core-module algorithms, and the confirmed `src/` source-of-truth and `dev`-branch-target rules.
+- [`command-reference.md`](tinytorch/command-reference.md): every `tito` CLI command and flag, grepped directly from `tito/main.py` and `tito/commands/`, not from any existing help text.
+- [`deep-dive.md`](tinytorch/deep-dive.md): how TinyTorch actually works end to end, from `install.sh` through module export to grading, sourced from reading the real code and a real installed environment on disk, not estimates.
 - Whitepaper: [`tinytorch/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/tinytorch/paper/paper.tex), "TinyTorch: Building Machine Learning Systems from First Principles," by Vijay Janapa Reddi. Argues ML education has an "algorithm-systems divide" and presents the 20-module build-your-own-framework curriculum as the fix, runnable on 4GB RAM with no GPU. Compiled to PDF in CI, separately from the Quarto-built textbook.
 
 ### `mlsysim/`
