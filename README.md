@@ -25,6 +25,7 @@ Interview-prep question bank and practice app.
 - [`ci-workflows.md`](staffml/ci-workflows.md)
 - [`coding-style.md`](staffml/coding-style.md)
 - [`perspective.md`](staffml/perspective.md): the discuss-before-you-PR expectation for new features, stated directly by a collaborator and reinforced by Vijay's own review pattern.
+- Whitepaper: [`interviews/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/interviews/paper/paper.tex), "StaffML: A Physics-Grounded Interview Question Bank for Machine Learning Systems Engineers." Makes the case for testing "mechanical sympathy" (quantitative hardware reasoning) rather than algorithmic coding puzzles, and describes the question bank's four-axis classification (topic, cognitive zone, hardware track, level) and its validated LinkML/Pydantic schema. Compiled to PDF separately from the Quarto-built textbook, in CI.
 
 ## [`tinytorch/`](tinytorch/)
 
@@ -36,6 +37,7 @@ Hands-on course where students build an ML framework from scratch.
 - [`ci-workflows.md`](tinytorch/ci-workflows.md)
 - [`coding-style.md`](tinytorch/coding-style.md)
 - [`perspective.md`](tinytorch/perspective.md): why solutions are still visible in module source, the "durable foundation" bar for new core-module algorithms, the confirmed `src/` source-of-truth and `dev`-branch-target rules.
+- Whitepaper: [`tinytorch/paper/paper.tex`](https://github.com/harvard-edge/cs249r_book/blob/dev/tinytorch/paper/paper.tex), "TinyTorch: Building Machine Learning Systems from First Principles," by Vijay Janapa Reddi. Argues ML education has an "algorithm-systems divide" (students learn gradient descent without measuring memory, attention without reasoning about $O(N^2)$ scaling) and presents the 20-module build-your-own-framework curriculum as the fix, runnable on 4GB RAM with no GPU. Compiled to PDF separately from the Quarto-built textbook, in CI.
 
 ## [`mlsysim/`](mlsysim/)
 
