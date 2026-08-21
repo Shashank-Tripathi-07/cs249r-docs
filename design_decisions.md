@@ -1,0 +1,86 @@
+# Design Decisions: What Prof. Vijay Has Actually Said
+
+*A sourced record of explicit design decisions, scope calls, and stated policy from Prof. Vijay Janapa Reddi (GitHub `profvjreddi`, the project lead and top contributor at 327 merged PRs, see `pr-history.md`) across `harvard-edge/cs249r_book`. Every entry below is a real comment or PR action, not an inference from code. Each one links to its source with a date so you can read the full thread yourself. This document answers "what has the maintainer actually decided and why," as opposed to the per-project `design.md` files, which answer "what does the project look like today." If you're about to propose a change and want to know whether it's already been settled, rejected, or is genuinely open, check here first.*
+
+*Compiled 2026-08-21 from a search of the 100 most recent issues and 100 most recent PRs he's commented on, plus targeted keyword searches across his comments (`out of scope`, `by design`, `policy`, `philosophy`, `wrong direction`, `single source of truth`, and similar). Where a category turned up thin or nothing, that's noted explicitly rather than left silent, since a documented absence is still useful: it tells you the question is genuinely open rather than already decided.*
+
+## How to propose something new
+
+**Discuss significant feature additions with Vijay before opening a PR, especially for StaffML.** A collaborator told a contributor directly: "I'd like you to ask for permission from prof. before building a PR. Going straight for a PR without discussing a feature can lead to the PR rejection." Vijay's own follow-up in the same thread confirms this by asking clarifying scope questions before green-lighting anything, rather than reacting to a finished PR. (2026-07-19/22, https://github.com/harvard-edge/cs249r_book/issues/1792#issuecomment-5014726497, follow-up https://github.com/harvard-edge/cs249r_book/issues/1792#issuecomment-5042944619)
+
+This isn't a blanket rule for every PR (routine bug fixes and small contributions merge without a pre-discussion step, as the 1187-PR history in `pr-history.md` shows), but it is the stated expectation for anything that adds new scope rather than fixing existing behavior.
+
+## Contribution scope: what gets accepted
+
+**New algorithm/optimizer proposals for TinyTorch's core modules are vetted against a "durable foundation" bar, not novelty.** Rejected adding the Muon optimizer to core Module 07: "For now we want to keep module 07 focused on the classic ladder of SGD, momentum, and Adam... TinyTorch's job in these core modules is to build that durable foundation from scratch, so I try to be deliberate about what earns a slot... Muon is newer and still proving itself... I would rather let it settle before it goes into a foundations course." Suggested as an optional advanced example instead of core content. (2026-07-03, https://github.com/harvard-edge/cs249r_book/issues/1925#issuecomment-4877640320)
+
+**Non-core hardware/lab proposals are welcomed if they match the existing lab format, and routed to the labs maintainer rather than decided unilaterally.** On a request to add Arduino Nano 33 BLE Sense labs, Vijay noted the project had already moved away from that board ("Arduino has been wanting to step away from it... so we went down the route of the Nicla Vision") but said a Nano 33 BLE lab would be fine "as long as [it] is consistent with the format we are following." (2025-04-12, https://github.com/harvard-edge/cs249r_book/issues/805#issuecomment-2798947630)
+
+**A dedicated Discord server for contributors was proposed twice and ultimately declined**, not by a hard veto but by the proposer (a collaborator) closing it after concluding the effort-to-return ratio didn't justify it at the project's current scale, following Vijay's ambivalent response: "I do agree it'd be nice... but I just worry about maintenance." Worth knowing if you're tempted to re-propose it: the stated blocker was maintenance burden, not the idea itself. (2026-05-29, https://github.com/harvard-edge/cs249r_book/issues/1635#issuecomment-4569425318; closed 2026-08-07, https://github.com/harvard-edge/cs249r_book/issues/1635#issuecomment-5210884242)
+
+## Architecture and code organization
+
+**TinyTorch's source-of-truth files are `src/NN_name/NN_name.py`, confirmed explicitly by Vijay: "contributors should edit the `src/NN_name/NN_name.py` files directly. Those are the source of truth."** The exported package under `tinytorch/tinytorch/` is generated output and should never be hand-edited; this matches what `tinytorch/design.md` and `implementation.md` already document about the module pipeline, but this is Vijay stating it as policy directly rather than something inferred from the build tooling. (2026-02-14, https://github.com/harvard-edge/cs249r_book/issues/1173#issuecomment-3902027846)
+
+**PRs to TinyTorch must target `dev`, the integration branch, not `main`.** When a contributor's PR was based on `main` and couldn't merge cleanly into `dev`, Vijay manually reapplied the change on `dev` himself while preserving the original author's attribution, rather than asking for a rebase. This confirms `dev` as the real integration point and `main` as strictly downstream of it. (2026-06-21, https://github.com/harvard-edge/cs249r_book/pull/1875#issuecomment-4762461328)
+
+**Publish and compression scripts were deliberately relocated out of `quarto/` into `tools/scripts/publish/`**, to separate Quarto's own build tooling from broader workflow tooling that happens to run around it, with an explicit constraint to keep the existing relative (`../../`-style) paths rather than switching to `github.workspace`-based absolute paths. Noted as partially completed: the compression scripts were left behind at the time of the last status update, so don't assume this migration is fully done just because the issue reads as decided. (2025-10-19, https://github.com/harvard-edge/cs249r_book/issues/953#issuecomment-3419820187)
+
+**The Quarto build moved to a unified two-volume `_quarto.yml` structure** rather than continuing with duplicated, ad hoc HTML/PDF/EPUB configuration per format. Closed as "the build system has been significantly reworked." (2026-04-03, https://github.com/harvard-edge/cs249r_book/issues/931#issuecomment-4184846986)
+
+**CI build performance was solved by full containerization (Docker, for both Linux and Windows), not incremental fixes to the existing `quarto-build.yml`.** "The container system is now the primary build method for the project," citing an 80-90% build time reduction (45 minutes down to 5-10 minutes), with pre-built images published at `ghcr.io/harvard-edge/cs249r_book/`. If you're looking at a slow build step and thinking about optimizing the workflow YAML directly, check whether containerizing that step is the actual intended direction first. (2025-08-23, https://github.com/harvard-edge/cs249r_book/issues/922#issuecomment-3217113590)
+
+**Repo clone-size bloat is being fixed at the source, not worked around.** Git LFS was adopted for large binaries (PDF/EPUB) going forward via `.gitattributes` (non-destructive, no history rewrite in this phase), and generated files (`corpus.json`, `bundle.js`) were moved to `.gitignore` on the reasoning that "neither file should be hand-edited" so they shouldn't be tracked at all. Phase 1 (the non-destructive part) merged in PR #1619. Phase 2, a full history rewrite via `git lfs migrate import` plus a force-push, was explicitly deferred: Vijay called it "a coordinated team rollout, not a code change," meaning it needs to be scheduled and communicated, not just implemented. (2026-04-30, https://github.com/harvard-edge/cs249r_book/issues/1393#issuecomment-4356775971)
+
+**Figure and table captions follow a mandated format: "**bold**: explanation".** Flagged as a violated convention in the book and fixed to match. (2025-08-23, https://github.com/harvard-edge/cs249r_book/issues/920#issuecomment-3217125190, fix commit `c427d8f5`)
+
+## Versioning and release process
+
+**TinyTorch's versioning scheme was explicitly modeled on the book's, for consistency across the whole repo**: semantic versioning, `pyproject.toml` as the single source of truth for the version number, automated README badge updates, a `CHANGELOG.md`, and `tinytorch-v*` tag-based releases, described as mirroring "the book's system (`book-v*` tags) for consistency across the project." If you're touching release tooling in any sub-project, this is the reference scheme to match rather than inventing a new one. (2026-01-23, https://github.com/harvard-edge/cs249r_book/issues/1079#issuecomment-3790246058)
+
+## Naming and style conventions
+
+**All files and directories must be snake_case.** Enforced via a dedicated `feature/enforce-snake-case` branch and standardized script naming across the repo. (2025-08-23, https://github.com/harvard-edge/cs249r_book/issues/941#issuecomment-3217141681)
+
+**CI workflow naming for TinyTorch versus analysis workflows was cleaned up organically, as a side effect of other bug-fixing work, not as a discrete formal renaming pass.** Vijay closed the tracking issue noting "I've cleaned the code up quite a bit and fixed many bugs and issues" in the course of unrelated work. There is no separate, published naming scheme document for this; if you need a naming convention for a new workflow, look at the current file names for precedent rather than expecting a written spec. (2026-01-29, https://github.com/harvard-edge/cs249r_book/issues/1075#issuecomment-3817310706; closed 2026-04-03, https://github.com/harvard-edge/cs249r_book/issues/1075#issuecomment-4184723456)
+
+## CI and testing philosophy
+
+**Duplicated logic is treated as a bug in itself, not just tech debt to clean up eventually.** The changelog is generated once and shared between the live publish workflow and local Quarto rendering, rather than regenerated redundantly in both places; the fix framing was correctness, not tidiness. (2025-08-23, https://github.com/harvard-edge/cs249r_book/issues/917#issuecomment-3217125242)
+
+**Bug scope gets corrected through deeper analysis rather than accepted at face value from the initial report, and an overly broad fix gets reverted in favor of a narrower, correct one.** An initial issue framed 32 of 33 marimo labs as violating a "widget-in-gated-cell" anti-pattern. After deeper analysis, the real bug was narrowed to only gated cells that leak *multiple* widgets (cascading undefined state); single-widget sequential-unlock gating "actually works correctly in practice." Scope was cut from 32 labs down to 14. A prior PR (#1349) that had already attempted the broad fix was explicitly called "the wrong direction (removed gates entirely rather than splitting widgets per cell)" and closed unmerged; the correct fix (per #1339, the canonical template) keeps gating intact and ensures each gated cell defines at most one widget. (2026-04-16, https://github.com/harvard-edge/cs249r_book/issues/1347#issuecomment-4263182334)
+
+No standalone CI/testing doctrine (coverage targets, a flakiness policy, a required-test-types-before-merge rule) turned up beyond the two instances above. Most testing-related comments from Vijay are per-bug fixes, not stated general policy; treat this as an open area rather than an established one.
+
+## Content and pedagogy decisions (the textbook)
+
+**The book's scope was deliberately tightened by the two-volume restructure.** "Volume I focuses on single machine ML systems foundations and Volume II focuses on distributed systems at scale... Meta learning and continual learning are important topics but they fall outside the core systems focus of both volumes." A content request that had been open and accepted since 2023 was closed as out of scope once this restructure landed, meaning "previously discussed as in-scope" is not a guarantee it still is; check against the current two-volume framing. (2026-04-03, https://github.com/harvard-edge/cs249r_book/issues/129#issuecomment-4184722900)
+
+**Section-level quiz learning objectives are intentionally loosely coupled to chapter-level learning objectives, not required to match wording.** Rationale given in detail: chapter objectives are broad, carefully revised goals, while quiz questions are section-scoped and test specific concepts, so one chapter objective naturally maps to several narrower quiz-question objectives. Vijay offered to tighten the coupling only if it would serve a concrete downstream use case (like curriculum mapping tooling); the requester agreed the current looser coupling was fine as a design choice, not a gap. (2025-11-01, https://github.com/harvard-edge/cs249r_book/issues/1011#issuecomment-3476481273)
+
+## TinyTorch-specific decisions
+
+**Solutions are intentionally left visible in module source right now, by design, not an oversight.** "The reason I haven't released the solution-free versions yet is intentional... we don't want learners implementing every single function. Some implementations are pedagogically valuable... while others are just boilerplate." A pass to decide which functions become fill-in-the-blank versus pre-provided is described as upcoming work, tied to the `nbgrader`/`tito grade` infrastructure already built for exactly this purpose. (2025-12-17, https://github.com/harvard-edge/cs249r_book/issues/1081#issuecomment-3665196522, reiterated https://github.com/harvard-edge/cs249r_book/issues/1081#issuecomment-3666498700)
+
+This was reiterated more concretely seven months later: "That's partly by design for where we want to vet the framework, till we know the solutions are rock solid." The long-run plan is a single systematic pass stripping every `### BEGIN SOLUTION` / `### END SOLUTION` block across all 20 modules, wired into `tito module start`, deliberately not patched module by module as a series of small fixes. If you're tempted to strip solutions from just the module you're working on, that's explicitly not the intended path; the strip-down is meant to happen once, everywhere, when the framework is judged stable enough. (2026-07-02, https://github.com/harvard-edge/cs249r_book/issues/1684#issuecomment-4869997359)
+
+**Command naming was clarified in the same thread**: there is no `tito src export` command (a contributor had proposed it under a mistaken assumption it existed); the real, correct contributor-facing command is `tito dev export`, and it's explicitly scoped to module authors, not students.
+
+**Arena/leaderboard sync lag between `tito` publishing results and the community dashboard updating is accepted, expected behavior, not a bug.** "There's an expected lag between tito publishing results and the Arena leaderboard updating. This is a known sync delay, not a bug." If you see this reported as an issue, it's a documentation gap (nobody has written this down for students) rather than something to fix in the sync pipeline. (2026-04-03, https://github.com/harvard-edge/cs249r_book/issues/1232#issuecomment-4184854043)
+
+## Rejected or reverted approaches: what not to do, and why
+
+- **The Muon optimizer** was rejected for TinyTorch's core Module 07 for pedagogical-stability reasons, not code quality (see "Contribution scope" above). If you're proposing a newer/trendier algorithm for a core module, expect the same "let it settle first" bar.
+- **PR #1349**, an attempt to fix the marimo labs widget-cascade bug, was closed unmerged for removing gating entirely instead of the narrower, correct fix of splitting widgets per cell (see "CI and testing philosophy" above).
+- **Meta-learning and continual-learning content** was rejected for the book after the two-volume restructure, as outside the core systems focus of both volumes (see "Content and pedagogy decisions" above).
+- **A dedicated Discord server** was ultimately declined as not worth the maintenance overhead at the project's current scale (see "Contribution scope" above). Notable because Vijay never issued a hard veto; his tepid response was enough for the proposer to self-close it.
+
+## What wasn't found (explicitly, so you know these are open questions)
+
+- No broader style-guide statement beyond snake_case naming (#941) and the figure-caption format (#920) turned up; nothing on docstring conventions, commit message format, or similar.
+- No general CI/testing-coverage policy (a minimum coverage percentage, required test types before merge, a flakiness SLA) was found; only the per-incident decisions listed under "CI and testing philosophy" above exist.
+- No MLPerf-edu or SocratiQ scope-boundary statement from Vijay was found in this search. The only MLSysim-related comment found was a routine Makefile bug fix (#1299), not an architecture or scope decision.
+- No off-GitHub decision reference (something like "per Vijay's guidance from our meeting") was found in any thread reviewed, aside from logistics coordination for a TinyTorch community meetup (#1167), which isn't a technical decision.
+- Issue #1213 (Windows CI Quarto upgrade) has no comment from Vijay at all, only a contributor's stated intent to work on it. No decision content exists there yet.
+
+If you're trying to settle a question and it falls into one of the gaps above, that's a real signal it's worth asking about directly rather than assuming an answer either way.
